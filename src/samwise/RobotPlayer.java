@@ -119,6 +119,7 @@ public class RobotPlayer {
                 MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
                 islandLocs.addAll(Arrays.asList(thisIslandLocs));
             }
+            // TODO: go towards nearest island instead
             if (islandLocs.size() > 0) {
                 MapLocation islandLocation = islandLocs.iterator().next();
                 rc.setIndicatorString("Moving my anchor towards " + islandLocation);
