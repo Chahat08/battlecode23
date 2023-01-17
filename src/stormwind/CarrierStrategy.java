@@ -3,12 +3,11 @@ package stormwind;
 
 import battlecode.common.*;
 
+import static stormwind.RobotPlayer.*;
+
 public class CarrierStrategy {
-
-    static MapLocation hqLoc;
-    static MapLocation wellLoc;
     static MapLocation islandLoc;
-
+    static boolean communicatorMode=false;
     static boolean anchorMode = false;
     static int numHeadquarters = 0;
     static int MAX_NUMBER_ISLANDS = 10;
@@ -18,12 +17,31 @@ public class CarrierStrategy {
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
      */
     static void runCarrier(RobotController rc) throws GameActionException {
-        if (RobotPlayer.turnCount == 2) {
-            Communication.updateHeadquarterInfo(rc);
-        }
+        // identify what's nearby
         if(hqLoc == null) scanHQ(rc);
         if(wellLoc == null) scanWells(rc);
-        scanIslands(rc);
+        if(islandLoc == null) scanIslands(rc);
+
+
+        // communicator bot setup
+        if (RobotPlayer.turnCount <= 2 && rc.readSharedArray(62) == 1) {
+            System.out.println("Communicator setup");
+            Communication.updateHeadquarterInfo(rc);
+
+
+            communicatorMode = true;
+            for (int i = 0; i < GameConstants.MAX_STARTING_HEADQUARTERS; i++) {
+                if(hqLoc.equals((Communication.headquarterLocs[i])))
+                {
+                    if(i < 3 )
+                        nexthqloc = Communication.headquarterLocs[i+1];
+                    else
+                        nexthqloc = Communication.headquarterLocs[0];
+                }
+            }
+
+        }
+
 
         //Collect from well if close and inventory not full
         if(wellLoc != null && rc.canCollectResource(wellLoc, -1)) rc.collectResource(wellLoc, -1);
@@ -67,7 +85,7 @@ public class CarrierStrategy {
                 RobotPlayer.moveTowards(rc, hqLoc);
             }
         }
-        Communication.tryWriteMessages(rc);
+//        Communication.tryWriteMessages(rc);
     }
 
     static void scanHQ(RobotController rc) throws GameActionException {

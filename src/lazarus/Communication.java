@@ -1,11 +1,11 @@
-package stormwind;
+package lazarus;
 
-
-import java.util.List;
-
-import java.util.ArrayList;
 
 import battlecode.common.*;
+import lazarus.RobotPlayer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class Message {
     public int idx;
@@ -37,24 +37,22 @@ class Communication {
 
 
     private static List<Message> messagesQueue = new ArrayList<>();
-    static MapLocation[] headquarterLocs = new MapLocation[GameConstants.MAX_STARTING_HEADQUARTERS];
+    private static MapLocation[] headquarterLocs = new MapLocation[GameConstants.MAX_STARTING_HEADQUARTERS];
 
 
 
-    static int addHeadquarter(RobotController rc) throws GameActionException {
-        rc.writeSharedArray(63, rc.readSharedArray(63)+1);
+    static void addHeadquarter(RobotController rc) throws GameActionException {
         MapLocation me = rc.getLocation();
         for (int i = 0; i < GameConstants.MAX_STARTING_HEADQUARTERS; i++) {
             if (rc.readSharedArray(i) == 0) {
                 rc.writeSharedArray(i, locationToInt(rc, me));
-                return i;
+                break;
             }
         }
-        return -1; // wasn't able to allocate hq loc
     }
 
     static void updateHeadquarterInfo(RobotController rc) throws GameActionException {
-        if (RobotPlayer.turnCount == 2) {
+        if (stormwind.RobotPlayer.turnCount == 2) {
             for (int i = 0; i < GameConstants.MAX_STARTING_HEADQUARTERS; i++) {
                 headquarterLocs[i] = (intToLocation(rc, rc.readSharedArray(i)));
                 if (rc.readSharedArray(i) == 0) {
@@ -65,7 +63,7 @@ class Communication {
     }
 
     static void tryWriteMessages(RobotController rc) throws GameActionException {
-        messagesQueue.removeIf(msg -> msg.turnAdded + OUTDATED_TURNS_AMOUNT < RobotPlayer.turnCount);
+        messagesQueue.removeIf(msg -> msg.turnAdded + OUTDATED_TURNS_AMOUNT < stormwind.RobotPlayer.turnCount);
         // Can always write (0, 0), so just checks are we in range to write
         if (rc.canWriteSharedArray(0, 0)) {
             while (messagesQueue.size() > 0 ) {
@@ -96,7 +94,7 @@ class Communication {
         int oldIslandValue = rc.readSharedArray(idx);
         int updatedIslandValue = bitPackIslandInfo(rc, idx, closestIslandLoc);
         if (oldIslandValue != updatedIslandValue) {
-            Message msg = new Message(idx, updatedIslandValue, RobotPlayer.turnCount);
+            Message msg = new Message(idx, updatedIslandValue, stormwind.RobotPlayer.turnCount);
             messagesQueue.add(msg);
         }
     }
@@ -161,7 +159,7 @@ class Communication {
                     continue;
                 }
                 if (rc.canSenseLocation(mapLoc) && rc.senseNearbyRobots(mapLoc, AREA_RADIUS, rc.getTeam().opponent()).length == 0) {
-                    Message msg = new Message(i, locationToInt(rc, null), RobotPlayer.turnCount);
+                    Message msg = new Message(i, locationToInt(rc, null), stormwind.RobotPlayer.turnCount);
                     messagesQueue.add(msg);
                 }
             } catch (GameActionException e) {

@@ -2,8 +2,10 @@ package stormwind;
 
 import battlecode.common.*;
 
-public class LauncherStrategy {
+import static stormwind.RobotPlayer.*;
 
+public class LauncherStrategy {
+    static boolean communicatorMode = false;
     /**
      * Run a single turn for a Launcher.
      * This code is wrapped inside the infinite loop in run(), so it is called once per turn.
@@ -16,7 +18,7 @@ public class LauncherStrategy {
         int lowestHealth = 100;
         int smallestDistance = 100;
         RobotInfo target = null;
-        if (RobotPlayer.turnCount == 2) {
+        if (turnCount == 2) {
             Communication.updateHeadquarterInfo(rc);
         }
         Communication.clearObsoleteEnemies(rc);
