@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import battlecode.common.*;
+import common.bitwisemanipulation.*;
 
 class Message {
     public int idx;
@@ -39,7 +40,7 @@ class Communication {
     private static List<Message> messagesQueue = new ArrayList<>();
     private static MapLocation[] headquarterLocs = new MapLocation[GameConstants.MAX_STARTING_HEADQUARTERS];
 
-
+    private static final BitwiseOperations bitwiseOperations = new BitwiseOperationsImpl();
 
     static void addHeadquarter(RobotController rc) throws GameActionException {
         MapLocation me = rc.getLocation();
@@ -221,4 +222,5 @@ class Communication {
         m--;
         return new MapLocation(m % rc.getMapWidth(), m / rc.getMapWidth());
     }
+
 }
