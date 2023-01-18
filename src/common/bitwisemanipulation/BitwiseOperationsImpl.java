@@ -17,6 +17,13 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     }
 
     @Override
+    public int readKthBitOfInteger(int x, int k) {
+        int flag = 1;
+        x >>= k;
+        return x&flag;
+    }
+
+    @Override
     public void setKthBitOfArray(int[] array, int k) {
         int idx = k/32;
         int position = k%32;
@@ -28,6 +35,13 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
         int idx = k/32;
         int position = k%32;
         array[idx] = clearKthBitOfInteger(array[idx], position);
+    }
+
+    @Override
+    public int readKthBitOfArray(int[] array, int k) {
+        int idx = k/32;
+        int position = k%32;
+        return readKthBitOfInteger(array[idx], position);
     }
 
     @Override
@@ -58,6 +72,18 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
             if(ch=='1') x+=Math.pow(2, bitString.length()-i-1);
         }
         return x;
+    }
+
+    @Override
+    public String[] getIntegerAs8FourBitStrings(int x) {
+        String[] bitStrings = new String[8];
+        String bitString = getIntegerAs32BitString(x);
+
+        for(int i=0, j=0; j<8; i+=4, ++j){
+            bitStrings[j]=bitString.substring(i, i+4);
+        }
+
+        return bitStrings;
     }
 
     @Override

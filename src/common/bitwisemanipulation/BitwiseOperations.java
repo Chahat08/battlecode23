@@ -23,6 +23,17 @@ public interface BitwiseOperations {
     int clearKthBitOfInteger(int x, int k);
 
     /**
+     * Reads the Kth bit of an integer. Returns either 0 or 1 based on what it is.
+     * Example: x = 33559540, Binary Representation: 0000 0010 0000 0000 0001 0011 1111 0100
+     * k=2, will return 1
+     * @param x the integer whose bit is to be read
+     * @param k the position k to read from
+     * @return 0, 1 depending on what the bit k is
+     */
+    int readKthBitOfInteger(int x, int k);
+
+
+    /**
      * set kth bit in a bitarray
      * @param array the integer array representing the bitarray
      * @param k the bit to set
@@ -37,6 +48,14 @@ public interface BitwiseOperations {
     void clearKthBitOfArray(int[] array, int k);
 
     /**
+     * reads the kth bit of a bitarray
+     * @param array the integer array representing the bitarray
+     * @param k the bit to read
+     * @return bit at kth index of bitarray
+     */
+    int readKthBitOfArray(int[] array, int k);
+
+    /**
      * Returns the integer passed as a bit string of 32 characters.
      * @param x the integer
      * @return 32 character bit string representing the integer
@@ -49,6 +68,15 @@ public interface BitwiseOperations {
      * @return the integer represented by the passed bitstring
      */
     int getBitStringAsInteger(String bitstring);
+
+    /**
+     * Returns the integer as 4 bit long bitStrings
+     * Example: x = 33559540, Binary Representation: 0000 0010 0000 0000 0001 0011 1111 0100
+     * What is returned is: ["0000","0010","0000","0000","0001","0011","1111","0100"]
+     * @param x the integer
+     * @return x, as an array of 8 four bit strings
+     */
+    String[] getIntegerAs8FourBitStrings(int x);
 
     /**
      * Set N bits starting from 0-indexed Kth bit of integer x
@@ -89,4 +117,5 @@ public interface BitwiseOperations {
      * @return integer with its bits set according to bitString starting at position k
      */
     int setBitStringInIntegerAtPositionK(int x, String bitString, int k);
+
 }
