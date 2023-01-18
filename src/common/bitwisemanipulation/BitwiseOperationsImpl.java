@@ -57,6 +57,30 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     }
 
     @Override
+    public String getIntegerAsStrippedBitString(int x) {
+        String bitStr = getIntegerAs32BitString(x);
+        int rem=0, i=0;
+        while(bitStr.charAt(i++)=='0'){
+            rem++;
+            if(i==bitStr.length()) break;
+        } if(rem==bitStr.length()) return "0";
+
+        return bitStr.substring(rem);
+    }
+
+    @Override
+    public String getIntegerAs12BitString(int x) {
+        StringBuilder bitString = new StringBuilder("0000000000000000");
+        for(int i=0; i<12; ++i){
+            int idx= 12-i-1;
+            if((x&1)==1) bitString.setCharAt(idx, '1');
+            else bitString.setCharAt(idx, '0');
+            x>>=1;
+        }
+        return bitString.toString();
+    }
+
+    @Override
     public int getBitStringAsInteger(String bitStr) {
         // removing leading 0s, if any
         int rem=0, i=0;

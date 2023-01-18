@@ -5,14 +5,15 @@ import battlecode.common.RobotController;
 
 public class Utils {
 
-    private static int locationToInt(RobotController rc, MapLocation m) {
+    public static int locationToInt(RobotController rc, MapLocation m) {
         if (m == null) {
             return 0;
         }
         return 1 + m.x + m.y * rc.getMapWidth();
+        // 1 + 60 +(60*60) = 3661
     }
 
-    private static MapLocation intToLocation(RobotController rc, int m) {
+    public static MapLocation intToLocation(RobotController rc, int m) {
         if (m == 0) {
             return null;
         }
