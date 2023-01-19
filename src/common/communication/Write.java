@@ -7,19 +7,10 @@ import battlecode.common.RobotController;
 import common.bitwisemanipulation.BitwiseOperations;
 import common.bitwisemanipulation.BitwiseOperationsImpl;
 
-import common.utils.Utils;
-
+import common.utils.Utils.BitIndex;
 import static common.utils.Utils.locationToInt;
 
-class BitIndex{
-    int arrayIndex;
-    int bitPosition;
 
-    public BitIndex(int a, int b){
-        this.arrayIndex = a;
-        this.bitPosition = b;
-    }
-}
 // 1: BIT 0 write lock, BIT 1 index for write lock
 // 2: our HQ locations [bits: 0 to 11, 12 to 23, 24 to 31...]
 // 3: [...0 to 3, 4 to 15]
@@ -40,37 +31,44 @@ public class Write {
         int location = locationToInt(rc, loc); // 12 bits
         String bitStr = bitwiseOperations.getIntegerAs12BitString(location);
         int val = bitwiseOperations.setBitStringInIntegerAtPositionK(
-                rc.readSharedArray(bitIndex.arrayIndex),
+                rc.readSharedArray(bitIndex.getArrayIndex()),
                 bitStr,
-                bitIndex.bitPosition
+                bitIndex.getBitPosition()
                 );
-        rc.writeSharedArray(val, bitIndex.arrayIndex);
+        rc.writeSharedArray(val, bitIndex.getArrayIndex());
     }
     public static void addOurHQLocation(RobotController rc) throws GameActionException {
         MapLocation me = rc.getLocation();
-        if(Read.readOurHQLocations(rc).contains(locationToInt(rc, me))) return;
+        if(Read.readOurHQLocations(rc).contains(me)) return;
         switch (hqLocNumber){
             case 1:
                 hqLocNumber++;
+                System.out.println("FIRST HQ SET");
                 writeLocationAtBitIndex(me, rc, new BitIndex(1, 0));
                 break;
             case 2:
                 hqLocNumber++;
+                System.out.println("SECOND HQ SET");
                 writeLocationAtBitIndex(me, rc, new BitIndex(1, 12));
                 break;
             case 3:
                 hqLocNumber++;
+                System.out.println("THIRD HQ SET");
                 writeLocationAtBitIndex(me, rc, new BitIndex(2, 0));
                 break;
             case 4:
                 hqLocNumber++;
+                System.out.println("FOURTH HQ SET");
                 writeLocationAtBitIndex(me, rc, new BitIndex(2, 12));
                 break;
+            default:
+                System.out.println("This shouldnt be called");
+
         }
     }
 
     public static void addEnemyHQLocation(RobotController rc, MapLocation loc) throws GameActionException {
-        if(Read.readOurHQLocations(rc).contains(locationToInt(rc, loc))) return;
+        if(Read.readOurHQLocations(rc).contains(loc)) return;
 
         switch (enemyHQLocNumber){
             case 1:
@@ -89,6 +87,8 @@ public class Write {
                 enemyHQLocNumber++;
                 writeLocationAtBitIndex(loc, rc, new BitIndex(4, 12));
                 break;
+            default:
+                System.out.println("This shouldnt be called either");
         }
     }
 }
