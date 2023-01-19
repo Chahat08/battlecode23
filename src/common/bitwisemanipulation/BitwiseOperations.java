@@ -62,6 +62,10 @@ public interface BitwiseOperations {
      */
     String getIntegerAs32BitString(int x);
 
+    String getIntegerAsStrippedBitString(int x);
+    String getIntegerAs12BitString(int x);
+
+
     /**
      * Returns the integer represented by the bitstring
      * @param bitstring a string containing 1s and 0s representing an integer
