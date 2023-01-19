@@ -31,6 +31,7 @@ public class HeadquaterStrategy {
         Direction dir = directions[rng.nextInt(directions.length)];
         MapLocation newLoc = rc.getLocation().add(dir);
 
+        // TODO: build anchor at apt time
 //        if(rc.canBuildAnchor(Anchor.STANDARD)) {
 //            rc.buildAnchor(Anchor.STANDARD);
 //            rc.setIndicatorString("BUILDING ANCHOR");
