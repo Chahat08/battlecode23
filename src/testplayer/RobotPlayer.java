@@ -13,10 +13,8 @@ import static testplayer.HeadquaterStrategy.runHeadquaters;
 import static testplayer.LauncherStrategy.runLauncher;
 
 public class RobotPlayer {
-    static int turnCount = 0;
-
-    static final Random rng = new Random(6147);
-
+    static int turnCount = 0; // num of turns robot has been alive for
+    static final Random rng = new Random(6147); // random number generator
     static final Direction[] directions = {
             Direction.NORTH,
             Direction.NORTHEAST,
@@ -28,17 +26,14 @@ public class RobotPlayer {
             Direction.NORTHWEST,
     };
 
-
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
-
         System.out.println("TYPE: "+rc.getType()+", HEALTH: "+rc.getHealth());
 
         // game loop
         while(true){
             ++turnCount;
             try {
-
                 switch (rc.getType()) {
                     case HEADQUARTERS:
                         runHeadquaters(rc); break;
@@ -60,10 +55,6 @@ public class RobotPlayer {
             } finally {
                 Clock.yield(); // make code wait until next turn, then cont
             }
-
         }
-
     }
-
-
 }
