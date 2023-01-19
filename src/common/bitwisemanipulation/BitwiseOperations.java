@@ -73,6 +73,8 @@ public interface BitwiseOperations {
 
     String getIntegerAsStrippedBitString(int x);
     String getIntegerAs12BitString(int x);
+    String getIntegerAs16BitString(int x);
+    String getIntegerAs3BitString(int x);
 
 
     /**
@@ -130,5 +132,7 @@ public interface BitwiseOperations {
      * @return integer with its bits set according to bitString starting at position k
      */
     int setBitStringInIntegerAtPositionK(int x, String bitString, int k);
+
+    int setBitStringInBitStringAtPositionK(String originalBitString, String bitStringToEmbed, int k);
 
 }

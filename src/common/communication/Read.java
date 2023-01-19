@@ -26,27 +26,25 @@ public class Read {
         // location is stored as 12 bit int
 
         int valAtIndex = rc.readSharedArray(bitIndex.getArrayIndex());
-        System.out.println("val: "+valAtIndex);
         int loc = bitwiseOperations.getBitStringAsInteger(
-                bitwiseOperations.getIntegerAs32BitString(valAtIndex)
+                bitwiseOperations.getIntegerAs16BitString(valAtIndex)
                 .substring(bitIndex.getBitPosition(), bitIndex.getBitPosition()+12)
         );
-
-        System.out.println("loc as int: "+loc);
-
         return intToLocation(rc, loc);
     }
 
     public static HashMap<Integer, MapLocation> readOurHQLocations(RobotController rc) throws GameActionException{
-        String atIdx1 = bitwiseOperations.getIntegerAs32BitString(rc.readSharedArray(1));
-        String atIdx2 = bitwiseOperations.getIntegerAs32BitString(rc.readSharedArray(2));
+        String atIdx1 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(1));
+        String atIdx2 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(2));
+        String atIdx3 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(3));
+        String atIdx4 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(4));
 
 
         String[] headquaters = new String[4];
         headquaters[0] = atIdx1.substring(0,12);
-        headquaters[1] = atIdx1.substring(12,24);
-        headquaters[2] = atIdx2.substring(0,12);
-        headquaters[3] = atIdx2.substring(12,24);
+        headquaters[1] = atIdx2.substring(0,12);
+        headquaters[2] = atIdx3.substring(0,12);
+        headquaters[3] = atIdx4.substring(0,12);
 
         String ref = "000000000000";
 
@@ -71,15 +69,17 @@ public class Read {
     }
 
     public static HashMap<Integer, MapLocation> readEnemyHQLocations(RobotController rc) throws GameActionException{
-        String atIdx3 = bitwiseOperations.getIntegerAs32BitString(rc.readSharedArray(2));
-        String atIdx4 = bitwiseOperations.getIntegerAs32BitString(rc.readSharedArray(3));
+        String atIdx1 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(5));
+        String atIdx2 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(6));
+        String atIdx3 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(7));
+        String atIdx4 = bitwiseOperations.getIntegerAs16BitString(rc.readSharedArray(8));
 
 
         String[] headquaters = new String[4];
-        headquaters[0] = atIdx3.substring(0,12);
-        headquaters[1] = atIdx3.substring(12,24);
-        headquaters[2] = atIdx4.substring(0,12);
-        headquaters[3] = atIdx4.substring(12,24);
+        headquaters[0] = atIdx1.substring(0,12);
+        headquaters[1] = atIdx2.substring(0,12);
+        headquaters[2] = atIdx3.substring(0,12);
+        headquaters[3] = atIdx4.substring(0,12);
 
         String ref = "000000000000";
 
@@ -110,8 +110,8 @@ public class Read {
 
         for (Map.Entry<Integer, MapLocation> entry : mapLocationHashMap.entrySet()) {
             if (entry.getValue().equals(loc)) {
-                bitIndex.setArrayIndex(entry.getKey() == 1 || entry.getKey() == 2 ? 3 : 4);
-                bitIndex.setBitPosition(entry.getKey() == 1 || entry.getKey() == 3 ? 24 : 27);
+                bitIndex.setArrayIndex(entry.getKey() + 4);
+                bitIndex.setBitPosition(12);
                 break;
             }
         }

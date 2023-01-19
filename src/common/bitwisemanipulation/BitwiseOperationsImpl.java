@@ -86,6 +86,30 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     }
 
     @Override
+    public String getIntegerAs16BitString(int x) {
+        StringBuilder bitString = new StringBuilder("0000000000000000");
+        for(int i=0; i<16; ++i){
+            int idx= 16-i-1;
+            if((x&1)==1) bitString.setCharAt(idx, '1');
+            else bitString.setCharAt(idx, '0');
+            x>>=1;
+        }
+        return bitString.toString();
+    }
+
+    @Override
+    public String getIntegerAs3BitString(int x) {
+        StringBuilder bitString = new StringBuilder("000");
+        for(int i=0; i<3; ++i){
+            int idx= 3-i-1;
+            if((x&1)==1) bitString.setCharAt(idx, '1');
+            else bitString.setCharAt(idx, '0');
+            x>>=1;
+        }
+        return bitString.toString();
+    }
+
+    @Override
     public int getBitStringAsInteger(String bitStr) {
         // removing leading 0s, if any
         int rem=0, i=0;
@@ -140,6 +164,15 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
 
         return getBitStringAsInteger(
                 xAsBitString.replace(k, bitString.length()+k, bitString)
+                        .toString()
+        );
+    }
+
+    @Override
+    public int setBitStringInBitStringAtPositionK(String originalBitString, String bitStringToEmbed, int k) {
+        StringBuilder origString = new StringBuilder(originalBitString);
+        return getBitStringAsInteger(
+                origString.replace(k, bitStringToEmbed.length()+k, bitStringToEmbed)
                         .toString()
         );
     }
