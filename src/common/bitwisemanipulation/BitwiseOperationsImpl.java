@@ -24,6 +24,11 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     }
 
     @Override
+    public String readIthToJthBitOfIntegerAsBitString(int x, int i, int j) {
+        return getIntegerAs32BitString(x).substring(i, j);
+    }
+
+    @Override
     public void setKthBitOfArray(int[] array, int k) {
         int idx = k/32;
         int position = k%32;
