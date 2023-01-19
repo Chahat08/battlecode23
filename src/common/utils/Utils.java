@@ -8,8 +8,8 @@ import battlecode.common.RobotController;
 public class Utils {
 
     public static class BitIndex{
-        int arrayIndex;
-        int bitPosition;
+        int arrayIndex=0;
+        int bitPosition=0;
 
         public int getArrayIndex() {
             return arrayIndex;
@@ -18,9 +18,19 @@ public class Utils {
             return bitPosition;
         }
 
-        public BitIndex(int a, int b){
-            this.arrayIndex = a;
-            this.bitPosition = b;
+        public void setArrayIndex(int arrayIndex) {
+            this.arrayIndex = arrayIndex;
+        }
+
+        public void setBitPosition(int bitPosition) {
+            this.bitPosition = bitPosition;
+        }
+
+        public BitIndex(int arrayIndex, int bitPosition){
+            this.arrayIndex = arrayIndex;
+            this.bitPosition = bitPosition;
+        }
+        public BitIndex(){
         }
     }
 

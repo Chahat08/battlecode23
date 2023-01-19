@@ -1,25 +1,22 @@
 package testplayer;
 
 import battlecode.common.*;
+import common.communication.Read;
+import common.communication.Write;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static testplayer.RobotPlayer.directions;
 
 
 public class LauncherStrategy {
     static final Random rng = new Random(6147);
+    static boolean isAtEnemyHQ = false;
+
+    static final int MAX_LAUNCHER_BOT_COUNT_PER_HQ = 5;
 
     static void runLauncher(RobotController rc) throws GameActionException {
-
-        /*
-        TODO:
-        EXPLORATION
-        beginning game: find enemy headquaters, find wells and such, write to shared array
-         */
+        // STEP 1: check for enemy HQs
 
         int radius = rc.getType().actionRadiusSquared;
         Team opponent = rc.getTeam().opponent();
@@ -28,52 +25,34 @@ public class LauncherStrategy {
         // 1:2 attacking vs exploratory launchers in initial game
         MapLocation hqLocation = null;
         RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
-        if (enemies.length >= 0) {
-            for(RobotInfo enemy:enemies){
-                if(enemy.getType()==RobotType.HEADQUARTERS){
+        if (enemies.length >= 0) { // enemies found
+            for (RobotInfo enemy : enemies) {
+                if (enemy.getType() == RobotType.HEADQUARTERS) { // headquater type found
                     System.out.println("ENEMY HQ FOUND");
-                    System.out.println(enemy.getType());
-                    System.out.println(enemy.getLocation());
-                    hqLocation = enemy.getLocation();
-                    System.out.println(hqLocation);
+                    hqLocation = enemy.getLocation(); // write locally to move into it
+                    Write.addEnemyHQLocation(rc, enemy.getLocation()); // add to shared info
+                }
+                else if(isAtEnemyHQ){
+                    // attack any other enemy bots detected
+                    if(rc.canAttack(enemy.getLocation())){
+                        rc.attack(enemy.getLocation());
+                    }
                 }
             }
-            // MapLocation toAttack = enemies[0].location;
-//            MapLocation toAttack = rc.getLocation().add(Direction.EAST);
-//
-//            if (rc.canAttack(toAttack)) {
-//                rc.setIndicatorString("Attacking");
-//                rc.attack(toAttack);
-//            }
         }
 
-        // all nearby mapinfos
-        //TODO: UTILISE MAPINFOS HERE
-        //MapInfo[] mapInfos = rc.senseNearbyMapInfos(-1);
+        HashMap<Integer, MapLocation> enemyHQs = Read.readEnemyHQLocations(rc);
+        // let's read some enemy hq infos
 
-
-        // TODO: write to shared about this wellinfo, to send in carriers
-        WellInfo[] wellInfos = rc.senseNearbyWells(-1);
-        for(WellInfo wellInfo:wellInfos){
-            System.out.println("WELL LOCATED!!!");
-            System.out.println(wellInfo.getMapLocation());
-            System.out.println(wellInfo.getResourceType());
-
-            // if resource amount too low/0, convert to elixir well
-            System.out.println(wellInfo.getResource(wellInfo.getResourceType()));
-        }
-
-        // TODO: write to shared array about this islandinfo, to send in carriers
-        int[] islands = rc.senseNearbyIslands();
-        Set<MapLocation> islandLocs = new HashSet<>();
-        for (int id : islands) {
-            MapLocation[] thisIslandLocs = rc.senseNearbyIslandLocations(id);
-            islandLocs.addAll(Arrays.asList(thisIslandLocs));
-        }
-        if(islandLocs.size()>0){
-            System.out.println("ISLAND FOUND!!!");
-            for(MapLocation islandLoc : islandLocs){
-                System.out.println(islandLoc);
+        if(!enemyHQs.isEmpty()){
+            rc.setIndicatorString("enemy hq found!");
+            for(MapLocation enemyHQ :enemyHQs.values()){
+                System.out.println("Moving to HQ Location");
+                System.out.println(enemyHQ);
+                if(Read.readEnemyHQLauncherBotCount(rc, enemyHQ)<=MAX_LAUNCHER_BOT_COUNT_PER_HQ) {
+                    hqLocation = enemyHQ;
+                    break;
+                }
             }
         }
 
@@ -83,6 +62,10 @@ public class LauncherStrategy {
             System.out.println("Moving to HQ Location");
               if(rc.canMove(rc.getLocation().directionTo(hqLocation))){
                   rc.move(rc.getLocation().directionTo(hqLocation));
+              }
+              if(rc.canActLocation(hqLocation)){
+                  Write.addToEnemyHQLauncherBotCount(rc, hqLocation);
+                  isAtEnemyHQ = true;
               }
         } else { // else move randomly
             Direction dir = directions[rng.nextInt(directions.length)];

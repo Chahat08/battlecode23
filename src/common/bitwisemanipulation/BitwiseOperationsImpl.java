@@ -75,7 +75,7 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
 
     @Override
     public String getIntegerAs12BitString(int x) {
-        StringBuilder bitString = new StringBuilder("0000000000000000");
+        StringBuilder bitString = new StringBuilder("000000000000");
         for(int i=0; i<12; ++i){
             int idx= 12-i-1;
             if((x&1)==1) bitString.setCharAt(idx, '1');
@@ -138,10 +138,9 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     public int setBitStringInIntegerAtPositionK(int x, String bitString, int k) {
         StringBuilder xAsBitString = new StringBuilder(getIntegerAs32BitString(x));
 
-        for(int i=32-k-1, j=0; j<bitString.length(); ++j, ++i){
-            xAsBitString.setCharAt(i, bitString.charAt(j));
-        }
-
-        return getBitStringAsInteger(xAsBitString.toString());
+        return getBitStringAsInteger(
+                xAsBitString.replace(k, bitString.length()+k, bitString)
+                        .toString()
+        );
     }
 }

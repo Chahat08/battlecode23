@@ -14,7 +14,7 @@ public class HeadquaterStrategy {
     static int numLaunchers = 0;
 
     // 3:1 launcher:carrier creation ratio in the beginning of the game
-    static final int[] startingStrategy = {1,1,1,2};
+    static final int[] startingStrategy = {1,1,2,3};
 
 
     static void runHeadquaters(RobotController rc) throws GameActionException {
@@ -43,12 +43,17 @@ public class HeadquaterStrategy {
             if(rc.canBuildRobot(RobotType.CARRIER, newLoc)){
                 rc.buildRobot(RobotType.CARRIER, newLoc);
             }
-        } else {
+        } else if(createBot==1){
             rc.setIndicatorString("Trying to build a launcher");
             if(rc.canBuildRobot(RobotType.LAUNCHER, newLoc)){
                 rc.buildRobot(RobotType.LAUNCHER, newLoc);
             }
         }
-
+        else{
+            rc.setIndicatorString("Trying to build a amplifier");
+            if(rc.canBuildRobot(RobotType.AMPLIFIER, newLoc)){
+                rc.buildRobot(RobotType.AMPLIFIER, newLoc);
+            }
+        }
     }
 }
