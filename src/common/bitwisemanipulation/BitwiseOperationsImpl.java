@@ -24,6 +24,11 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     }
 
     @Override
+    public String readIthToJthBitOfIntegerAsBitString(int x, int i, int j) {
+        return getIntegerAs32BitString(x).substring(i, j);
+    }
+
+    @Override
     public void setKthBitOfArray(int[] array, int k) {
         int idx = k/32;
         int position = k%32;
@@ -70,9 +75,33 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
 
     @Override
     public String getIntegerAs12BitString(int x) {
-        StringBuilder bitString = new StringBuilder("0000000000000000");
+        StringBuilder bitString = new StringBuilder("000000000000");
         for(int i=0; i<12; ++i){
             int idx= 12-i-1;
+            if((x&1)==1) bitString.setCharAt(idx, '1');
+            else bitString.setCharAt(idx, '0');
+            x>>=1;
+        }
+        return bitString.toString();
+    }
+
+    @Override
+    public String getIntegerAs16BitString(int x) {
+        StringBuilder bitString = new StringBuilder("0000000000000000");
+        for(int i=0; i<16; ++i){
+            int idx= 16-i-1;
+            if((x&1)==1) bitString.setCharAt(idx, '1');
+            else bitString.setCharAt(idx, '0');
+            x>>=1;
+        }
+        return bitString.toString();
+    }
+
+    @Override
+    public String getIntegerAs3BitString(int x) {
+        StringBuilder bitString = new StringBuilder("000");
+        for(int i=0; i<3; ++i){
+            int idx= 3-i-1;
             if((x&1)==1) bitString.setCharAt(idx, '1');
             else bitString.setCharAt(idx, '0');
             x>>=1;
@@ -133,10 +162,18 @@ public class BitwiseOperationsImpl implements BitwiseOperations{
     public int setBitStringInIntegerAtPositionK(int x, String bitString, int k) {
         StringBuilder xAsBitString = new StringBuilder(getIntegerAs32BitString(x));
 
-        for(int i=32-k-1, j=0; j<bitString.length(); ++j, ++i){
-            xAsBitString.setCharAt(i, bitString.charAt(j));
-        }
+        return getBitStringAsInteger(
+                xAsBitString.replace(k, bitString.length()+k, bitString)
+                        .toString()
+        );
+    }
 
-        return getBitStringAsInteger(xAsBitString.toString());
+    @Override
+    public int setBitStringInBitStringAtPositionK(String originalBitString, String bitStringToEmbed, int k) {
+        StringBuilder origString = new StringBuilder(originalBitString);
+        return getBitStringAsInteger(
+                origString.replace(k, bitStringToEmbed.length()+k, bitStringToEmbed)
+                        .toString()
+        );
     }
 }

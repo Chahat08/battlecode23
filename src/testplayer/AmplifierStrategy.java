@@ -4,28 +4,23 @@ import battlecode.common.*;
 import common.communication.Read;
 import common.communication.Write;
 
-import java.util.*;
+import java.util.HashMap;
 
+import static testplayer.LauncherStrategy.MAX_LAUNCHER_BOT_COUNT_PER_HQ;
 import static testplayer.RobotPlayer.directions;
+import static testplayer.RobotPlayer.rng;
 
-
-public class LauncherStrategy {
-    static final Random rng = new Random(6147);
+public class AmplifierStrategy {
     static boolean isAtEnemyHQ = false;
-    static boolean didIncreaseCount = false;
 
-    static final int MAX_LAUNCHER_BOT_COUNT_PER_HQ = 5;
+    static void runAmplifier(RobotController rc) throws GameActionException {
 
-    static void runLauncher(RobotController rc) throws GameActionException {
-
-
-        // STEP 1: check for enemy HQs
+        // lets go park amplifiers by enemy hq
 
         int radius = rc.getType().actionRadiusSquared;
         Team opponent = rc.getTeam().opponent();
 
-        // TODO: think of better strategy to engage with the enemies, diff strats to engage w diff enemies
-        // 1:2 attacking vs exploratory launchers in initial game
+        // try to sense enemy headquaters and write if found
         MapLocation hqLocation = null;
         RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
         if (enemies.length >= 0) { // enemies found
@@ -34,17 +29,10 @@ public class LauncherStrategy {
                     hqLocation = enemy.getLocation(); // write locally to move into it
                     Write.addEnemyHQLocation(rc, enemy.getLocation()); // add to shared info
                 }
-                else if(isAtEnemyHQ){
-                    // attack any other enemy bots detected
-                    if(rc.canAttack(enemy.getLocation())){
-                        rc.attack(enemy.getLocation());
-                    }
-                }
             }
         }
 
         HashMap<Integer, MapLocation> enemyHQs = Read.readEnemyHQLocations(rc);
-        // let's read some enemy hq infos
 
         if(!enemyHQs.isEmpty()){
             rc.setIndicatorString("enemy hq found!");
@@ -56,23 +44,16 @@ public class LauncherStrategy {
             }
         }
 
-
         if(hqLocation!=null){
             // if enemy hq found, go there
-              if(rc.canMove(rc.getLocation().directionTo(hqLocation))){
-                  rc.move(rc.getLocation().directionTo(hqLocation));
-              }
-              if(rc.canActLocation(hqLocation)){
-                  if(rc.canWriteSharedArray(5, 1)) {
-                      Write.addToEnemyHQLauncherBotCount(rc, hqLocation);
-                      didIncreaseCount=true;
-                  }
-                  isAtEnemyHQ = true;
-              }
-            if(isAtEnemyHQ && !didIncreaseCount){
-                if(rc.canWriteSharedArray(5, 1)){
+            if(rc.canMove(rc.getLocation().directionTo(hqLocation))){
+                rc.move(rc.getLocation().directionTo(hqLocation));
+            }
+            if(rc.canActLocation(hqLocation)){
+                if(rc.canWriteSharedArray(5, 1)) {
                     Write.addToEnemyHQLauncherBotCount(rc, hqLocation);
                 }
+                isAtEnemyHQ = true;
             }
         } else { // else move randomly
             Direction dir = directions[rng.nextInt(directions.length)];
@@ -80,6 +61,5 @@ public class LauncherStrategy {
                 rc.move(dir);
             }
         }
-
     }
 }

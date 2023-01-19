@@ -32,6 +32,15 @@ public interface BitwiseOperations {
      */
     int readKthBitOfInteger(int x, int k);
 
+    /**
+     * Reads bits [i, j) of a 32 bit integer. J is not including
+     * @param x the integer
+     * @param i start index
+     * @param j end index (not inclusive)
+     * @return
+     */
+    String readIthToJthBitOfIntegerAsBitString(int x, int i, int j);
+
 
     /**
      * set kth bit in a bitarray
@@ -64,6 +73,8 @@ public interface BitwiseOperations {
 
     String getIntegerAsStrippedBitString(int x);
     String getIntegerAs12BitString(int x);
+    String getIntegerAs16BitString(int x);
+    String getIntegerAs3BitString(int x);
 
 
     /**
@@ -121,5 +132,7 @@ public interface BitwiseOperations {
      * @return integer with its bits set according to bitString starting at position k
      */
     int setBitStringInIntegerAtPositionK(int x, String bitString, int k);
+
+    int setBitStringInBitStringAtPositionK(String originalBitString, String bitStringToEmbed, int k);
 
 }

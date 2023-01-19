@@ -7,6 +7,7 @@ import battlecode.common.RobotController;
 
 import java.util.Random;
 
+import static testplayer.AmplifierStrategy.runAmplifier;
 import static testplayer.CarrierStrategy.runCarrier;
 import static testplayer.HeadquaterStrategy.runHeadquaters;
 import static testplayer.LauncherStrategy.runLauncher;
@@ -50,7 +51,7 @@ public class RobotPlayer {
                     case DESTABILIZER:
                         //runLauncher(rc); break; // do something
                     case AMPLIFIER:
-                        //runLauncher(rc); break; // do something
+                        runAmplifier(rc); break;
                 }
             } catch(GameActionException e){
                 e.printStackTrace();
