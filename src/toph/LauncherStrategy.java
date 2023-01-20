@@ -15,32 +15,48 @@ public class LauncherStrategy {
     static boolean isAtEnemyHQ = false;
     static boolean didIncreaseCount = false;
 
+    static final int DEFENSE_LAUNCHER_RATIO = 4;
     static final int MAX_LAUNCHER_BOT_COUNT_PER_HQ = 5;
     static final int MAX_MOVES_PER_TURNCOUNT = 2;
     static final int MAX_ATTACKS_PER_TURNCOUNT = 3;
 
 
     static MapLocation currentTargetLocation = null;
+    static MapLocation currentHQLocation = null;
+    static boolean reachedEnemyHQ = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
-        // ONE TURNCOUNT ATTACK, ONE TURNCOUNT MOVE
-        // SWITCH TO PATHING IF STORMS NEARBY
 
-        //runStuff(rc);
-        // things to do just after creation
-        if(turnCount==1) firstTurnCountRoutine(rc);
+        // let's have every 4th launcher we create remain near our hq for defense
+        if(rc.getID()%DEFENSE_LAUNCHER_RATIO!=0) {
+            // ATTACK LAUNCHERS
+            // launchers tasked to go to enemy hq
+            // and explore things on the way
 
-        // every third turncount, detect nearby things
-        if(turnCount%3==0) detectNearbyThings(rc);
+            // things to do just after creation
+            if (turnCount == 1) attackLaunchersFirstTurnCountRoutine(rc);
 
-        if(turnCount%2==1) { // MOVE EVERY OTHER TURN
-            moveToCurrentTargetLocation(rc);
-        } else{ // ATTACK EVERY OTHER TURN
+            // every third turncount, detect nearby things
+            if (turnCount % 3 == 0) detectNearbyThings(rc);
 
+            if (turnCount % 2 == 1) { // MOVE every other turn
+                moveToCurrentTargetLocation(rc);
+            } else { // ATTACK every other turn
+                attackEnemies(rc);
+            }
+
+        }
+        else{
+            // DEFENSE LAUNCHERS
+            // Launchers tasked to defend our headquaters
+            // remain near it and kill enemies approaching it
+            if(turnCount==1) defenseLaunchersFirstTurnCountRoutine(rc);
+            attackEnemies(rc);
+            moveRandomlyNearOurHQ(rc);
         }
     }
 
-    static void firstTurnCountRoutine(RobotController rc) throws GameActionException{
+    static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
 
         // SET THE CURRENT TARGET LOCATION TO A PLAUSIBLE HQ LOCATION
 
@@ -58,14 +74,34 @@ public class LauncherStrategy {
         }
     }
 
+    static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
+        currentHQLocation=rc.getLocation();
+    }
+
     static void moveToCurrentTargetLocation(RobotController rc) throws GameActionException{
         Direction dir = rc.getLocation().directionTo(currentTargetLocation);
         int i=0;
         while(i++<MAX_MOVES_PER_TURNCOUNT) {
             if (rc.canMove(dir))
                 rc.move(dir);
-            // TODO: pathfinding otherwise.
+            else {// TODO: pathfinding otherwise, move randomly for now
+                while(true){ // just finding a random direction to move in, wonder if iterating is better
+                    dir = directions[rng.nextInt(directions.length)];
+                    if (rc.canMove(dir)) {
+                        rc.move(dir);
+                        break;
+                    }
+                }
+            }
         }
+    }
+
+    static void moveRandomlyNearOurHQ(RobotController rc) throws GameActionException {
+        // defense robots which will stay near our headquaters only
+    }
+
+    static void attackEnemies(RobotController rc) throws GameActionException {
+
     }
 
     static void detectNearbyThings(RobotController rc) throws GameActionException {
