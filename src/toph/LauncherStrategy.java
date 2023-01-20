@@ -22,7 +22,6 @@ public class LauncherStrategy {
 
 
     static MapLocation currentTargetLocation = null;
-    static MapLocation currentHQLocation = null;
     static boolean reachedEnemyHQ = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
@@ -32,6 +31,10 @@ public class LauncherStrategy {
             // ATTACK LAUNCHERS
             // launchers tasked to go to enemy hq
             // and explore things on the way
+
+            rc.setIndicatorString("ATTACK LAUNCHER");
+
+            // TODO: CHANGE SYMMETRY/SET NEW TARGET BASED ON DETECTED SYMMETRY IF REACHED TARGET AND HQ NOT FOUND
 
             // things to do just after creation
             if (turnCount == 1) attackLaunchersFirstTurnCountRoutine(rc);
@@ -50,6 +53,9 @@ public class LauncherStrategy {
             // DEFENSE LAUNCHERS
             // Launchers tasked to defend our headquaters
             // remain near it and kill enemies approaching it
+
+            rc.setIndicatorString("DEFENSE LAUNCHER");
+
             if(turnCount==1) defenseLaunchersFirstTurnCountRoutine(rc);
             attackEnemies(rc);
             moveRandomlyNearOurHQ(rc);
@@ -75,7 +81,7 @@ public class LauncherStrategy {
     }
 
     static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
-        currentHQLocation=rc.getLocation();
+        currentTargetLocation=rc.getLocation();
     }
 
     static void moveToCurrentTargetLocation(RobotController rc) throws GameActionException{
@@ -98,10 +104,39 @@ public class LauncherStrategy {
 
     static void moveRandomlyNearOurHQ(RobotController rc) throws GameActionException {
         // defense robots which will stay near our headquaters only
-        
+        int i=0;
+        while(i++<MAX_MOVES_PER_TURNCOUNT) {
+            while (true) { // just finding a random direction to move in, wonder if iterating is better
+                Direction dir = rc.getLocation().directionTo(currentTargetLocation.add(directions[rng.nextInt(directions.length)]));
+                if (rc.canMove(dir)) {
+                    rc.move(dir);
+                    break;
+                }
+            }
+        }
     }
 
     static void attackEnemies(RobotController rc) throws GameActionException {
+        int radius = rc.getType().actionRadiusSquared;
+        Team opponent = rc.getTeam().opponent();
+
+        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
+
+        if (enemies.length >= 0) { // enemies found
+            for (RobotInfo enemy : enemies) {
+                if (enemy.getType() == RobotType.HEADQUARTERS){}// { // headquater type found
+//                    hqLocation = enemy.getLocation(); // write locally to move into it
+//                    Write.addEnemyHQLocation(rc, enemy.getLocation()); // add to shared info
+//                }
+                else {
+                //if(isAtEnemyHQ){
+                    // attack any other enemy bots detected
+                    if(rc.canAttack(enemy.getLocation())){
+                        rc.attack(enemy.getLocation());
+                    }
+                }
+            }
+        }
 
     }
 
