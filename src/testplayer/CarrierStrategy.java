@@ -12,9 +12,6 @@ import static testplayer.MovementStrategy.*;
 import static testplayer.RobotPlayer.*;
 
 public class CarrierStrategy {
-    static int hqLocationNumber = 1;
-
-
 
     // carry resources if near hq, well
     // attack-> throws resources at enemies
@@ -24,14 +21,18 @@ public class CarrierStrategy {
 
         if(turnCount == 10) {
             System.out.println(turnCount+ "_Update requested");
-            update(intToLocation(rc, rc.readSharedArray(41)), intToLocation(rc, rc.readSharedArray(42)));
+            update(rc, intToLocation(rc, rc.readSharedArray(41)), intToLocation(rc, rc.readSharedArray(42)));
         }
+        backforthMode = true;
         if(start != null && end != null){
-            if(findMode == true){
+            if(findMode){
                 find(rc);
             }
-            else{
+            else if (backforthMode){
                 backforth(rc);
+            }
+            else{
+                // attack
             }
         }
         else{

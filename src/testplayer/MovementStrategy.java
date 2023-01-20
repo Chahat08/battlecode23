@@ -10,11 +10,9 @@ import static testplayer.RobotPlayer.rng;
 public class MovementStrategy {
     static MapLocation start;
     static MapLocation end;
-
     static ArrayList<ArrayList<MapLocation>> pathMaps = new ArrayList<>();
-    static boolean isPathSet = false;
     static boolean findMode = true;
-    static boolean backforth = true;
+    static boolean backforthMode = true;
     static boolean moveforward = false;
     static ArrayList current1 = new ArrayList<MapLocation>();
     static MapLocation moved;
@@ -24,7 +22,7 @@ public class MovementStrategy {
     static int waitturn = 0;
 
     static void backforth(RobotController rc) throws GameActionException {
-        int a = moveTowards1(rc, closedList.get(pathIndex));
+        int a = moveTowards(rc, closedList.get(pathIndex));
         rc.setIndicatorString( "pathIndex: " + pathIndex);
         if (a== 1)
         {
@@ -69,7 +67,7 @@ public class MovementStrategy {
             if(mapInfo.opposite() == dir){
             }
             else{
-                moveTowards1(rc, current);
+                moveTowards(rc, current);
             }
             return;
         }
@@ -86,7 +84,7 @@ public class MovementStrategy {
         }
         else{
             // System.out.println("Cannot move to: " + current);
-            MapLocation a = moveRandom1(rc);
+            MapLocation a = moveRandom(rc);
             openList.remove(current);
             closedList.add(a);
             moved = a;
@@ -97,19 +95,20 @@ public class MovementStrategy {
             // found the path
             // System.out.println("Found the path");
             openList.clear();
-            isPathSet = true;
             findMode = false;
+            if (backforthMode == true) {
+                if(rc.getLocation() == closedList.get(closedList.size()-1)){
+                    pathIndex = closedList.size()-2;
+                }
+                else if(rc.getLocation() == closedList.get(0)){
+                    pathIndex = 1;
+                }
+                else{
+                    pathIndex = closedList.indexOf(rc.getLocation());
+                }
+            }
             // System.out.println("Closed list: " + closedList);
             // System.out.println("Current Loc: " + rc.getLocation());
-            if(rc.getLocation() == closedList.get(closedList.size()-1)){
-                pathIndex = closedList.size()-2;
-            }
-            else if(rc.getLocation() == closedList.get(0)){
-                pathIndex = 1;
-            }
-            else{
-                pathIndex = closedList.indexOf(rc.getLocation());
-            }
             // System.out.println("Path Index: " + pathIndex);
             return;
         }
@@ -158,7 +157,7 @@ public class MovementStrategy {
         // System.out.println("After sort:"+ openList);
     }
 
-    static MapLocation moveRandom1(RobotController rc) throws GameActionException {
+    static MapLocation moveRandom(RobotController rc) throws GameActionException {
         Direction dir = directions[rng.nextInt(directions.length)];
         if(rc.canMove(dir)){
             rc.move(dir);
@@ -166,41 +165,25 @@ public class MovementStrategy {
         return rc.getLocation();
     }
 
-    static int moveTowards1(RobotController rc, MapLocation target) throws GameActionException {
+    static int moveTowards(RobotController rc, MapLocation target) throws GameActionException {
         Direction dir = rc.getLocation().directionTo(target);
         if (rc.canMove(dir) && rc.senseMapInfo(rc.adjacentLocation(dir)).getCurrentDirection() != dir.opposite()) {
             rc.move(dir);
             return 1;
         }
         else {
-            moveRandom1(rc);
+            moveRandom(rc);
             return 0;
         }
     }
 
-    static void update(MapLocation start1, MapLocation end1) throws GameActionException{
-        // adds paths to pathMaps
-        ArrayList<MapLocation> newList= new ArrayList<>();
-        for(MapLocation p : closedList) {
-            newList.add(new MapLocation(p.x, p.y));
-        }
-        if(!pathMaps.contains(newList) && !newList.isEmpty()){
-            pathMaps.add(newList);
-        }
-        //
+    static void update(RobotController rc, MapLocation start1, MapLocation end1) throws GameActionException{
+        savepath(rc, closedList);// saves path
         if(!pathMaps.isEmpty()) {
             // checks if a good old path exists!!
             for (ArrayList<MapLocation> list : pathMaps) {
                 if (list.get(0).isWithinDistanceSquared(start1, 2) && list.get(list.size() - 1).isWithinDistanceSquared(end1, 2) || list.get(list.size() - 1).isWithinDistanceSquared(start1, 2) && list.get(0).isWithinDistanceSquared(end1, 2)) {
-                    start = list.get(0);
-                    end = list.get(list.size() - 1);
-                    isPathSet = true;
-                    findMode = false;
-                    pathIndex = 0;
-                    openList.clear();
-                    closedList.clear();
-                    closedList = list;
-                    moveforward = true;
+                    setuproad(rc, list.get(0), list.get(list.size() - 1));
                     // System.out.println("Path found and setup:" + closedList);
                     return;
                 }
@@ -209,15 +192,30 @@ public class MovementStrategy {
         else {
             // System.out.println("No path found");
             // if no path exists, then find a new one
-            start = start1;
-            end = end1;
-            isPathSet = false;
-            findMode = true;
-            openList.clear();
-            closedList.clear();
-            openList.add(start);
-            pathIndex = 0;
-            moveforward = true;
+            setuproad(rc,  start1, end1);
         }
     }
+
+    static void savepath(RobotController rc, ArrayList<MapLocation> path) throws GameActionException {
+        // adds path to pathMaps
+        ArrayList<MapLocation> newList= new ArrayList<>();
+        for(MapLocation p : path) {
+            newList.add(new MapLocation(p.x, p.y));
+        }
+        if(!pathMaps.contains(newList) && !newList.isEmpty()){
+            pathMaps.add(newList);
+        }
+    }
+
+    static void setuproad(RobotController rc, MapLocation start1, MapLocation end1) throws GameActionException {
+        start = start1;
+        end = end1;
+        findMode = true;
+        openList.clear();
+        closedList.clear();
+        openList.add(start);
+        pathIndex = 0;
+        moveforward = true;
+    }
+
 }

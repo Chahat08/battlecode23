@@ -23,7 +23,7 @@ public class LauncherStrategy {
     static void runLauncher(RobotController rc) throws GameActionException {
         if(turnCount == 10) {
             System.out.println(turnCount+ "_Update requested");
-            update(intToLocation(rc, rc.readSharedArray(43)), intToLocation(rc, rc.readSharedArray(44)));
+            update(rc, intToLocation(rc, rc.readSharedArray(43)), intToLocation(rc, rc.readSharedArray(44)));
         }
         if(start != null && end != null){
             if(findMode == true){
