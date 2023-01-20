@@ -12,7 +12,7 @@ import static toph.LauncherStrategy.runLauncher;
 
 public class RobotPlayer {
     static int turnCount = 0; // num of turns robot has been alive for
-    static final Random rng = new Random(6147); // random number generator
+    static final Random rng = new Random(1012); // random number generator
     static final Direction[] directions = {
             Direction.NORTH,
             Direction.NORTHEAST,
@@ -28,7 +28,7 @@ public class RobotPlayer {
         put(0, SymmetryType.ROTATIONAL);
         put(1, SymmetryType.HORIZONTAL);
         put(2, SymmetryType.VERTICAL);
-        put(3, SymmetryType.ROTATIONAL);
+        //put(3, SymmetryType.ROTATIONAL);
     }};
 
     @SuppressWarnings("unused")
