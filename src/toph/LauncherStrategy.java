@@ -98,6 +98,7 @@ public class LauncherStrategy {
 
     static void moveRandomlyNearOurHQ(RobotController rc) throws GameActionException {
         // defense robots which will stay near our headquaters only
+        
     }
 
     static void attackEnemies(RobotController rc) throws GameActionException {
