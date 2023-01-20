@@ -8,38 +8,34 @@ import java.util.*;
 
 import static common.utils.Utils.intToLocation;
 import static common.utils.Utils.locationToInt;
+import static testplayer.MovementStrategy.*;
 import static testplayer.RobotPlayer.*;
 
 public class CarrierStrategy {
     static int hqLocationNumber = 1;
 
-    static MapLocation start;
-    static MapLocation end;
-//    static int[] path;
 
-    static ArrayList<MapLocation> openList = new ArrayList<>();
-    static ArrayList<MapLocation> closedList = new ArrayList<>();
+
     // carry resources if near hq, well
     // attack-> throws resources at enemies
     // used to put anchors on sky islands
     // get slower with amount carried
     static void runCarrier(RobotController rc) throws GameActionException {
-//        System.out.println("Starting carrier:" + rc.getLocation());
-        if(turnCount == 1) {
-            MapLocation start = rc.adjacentLocation(Direction.NORTH);
-            end = new MapLocation(1, 1);
-            openList.add(start);
+
+        if(turnCount == 10) {
+            System.out.println(turnCount+ "_Update requested");
+            update(intToLocation(rc, rc.readSharedArray(41)), intToLocation(rc, rc.readSharedArray(42)));
         }
-        System.out.println("Open List:"+openList);
-        // cleans up open list to ensure memory issue dont occur
-        if(openList.size() >= 10){
-//            System.out.println("Open list too big, cleaning up");
-            openList.subList(9, openList.size()).clear();
+        if(start != null && end != null){
+            if(findMode == true){
+                find(rc);
+            }
+            else{
+                backforth(rc);
+            }
         }
-//        System.out.println("Is rc action ready?" + rc.isActionReady());
-        // if open list is empty, no point in move forward
-        if(!openList.isEmpty() && rc.isActionReady()){
-            movebest(rc);
+        else{
+            System.out.println("No instructions");
         }
 
 //        // NEW STUFF
@@ -170,64 +166,4 @@ public class CarrierStrategy {
 //        }
     }
 
-    static void movebest(RobotController rc) throws GameActionException {
-        // get current best move
-        MapLocation current = openList.get(0);
-        Direction dir = rc.getLocation().directionTo(current);
-
-        System.out.println("A* Debugg: "+ openList.size()+ "Current loc:" + rc.getLocation()+ "Want to move to:" + current);
-
-        if(rc.canMove(dir)){
-            System.out.println("Moving to: " + current);
-            rc.move(dir);
-            openList.remove(current);
-            closedList.add(current);
-            if(current.equals(end)){
-                // found the path
-                System.out.println("Found the path");
-            }
-            for(Direction d: directions){
-                MapLocation adj = rc.adjacentLocation(d);
-//                    System.out.println("Adding to open list"+ adj);
-                if(rc.onTheMap(adj)) {
-                    openList.add(adj);
-                }
-            }
-
-            // System.out.println("Gonna Dive in F Calculations");
-            // System.out.println("Open List:"+openList);
-            // calculate f value n reorder the array
-            fcalc(rc);
-        }
-        else{
-            System.out.println("Cannot move to: " + current);
-            System.out.println("Waiting for turn");
-        }
-    }
-    static void fcalc(RobotController rc) throws GameActionException {
-        List<Integer> f = new ArrayList<>();
-        Map<MapLocation, Integer> fMap = new HashMap<>();
-        for (MapLocation loc : openList) {
-            int p = 0;
-            Boolean test = rc.canSenseLocation(loc);
-            MapInfo mapInfo = rc.senseMapInfo(loc);
-            if ( test && mapInfo.isPassable() && rc.canMove(rc.getLocation().directionTo(loc))) {
-                  p -= loc.distanceSquaredTo(end);
-//                if (mapInfo.isPassable()) p += 5;
-//                if (rc.getLocation().distanceSquaredTo(end) > loc.distanceSquaredTo(end)) p += 10;
-//                if (mapInfo.hasCloud()) p += 2;
-//                if (rc.senseRobotAtLocation(mapInfo.getMapLocation()).getTeam() != rc.getTeam()) p -= 5;
-            } else {
-                p -= 1000;
-            }
-            fMap.put(loc, p);
-        }
-        Collections.sort(openList, new Comparator<MapLocation>(){
-            @Override
-            public int compare(MapLocation o1, MapLocation o2) {
-                return Integer.compare(fMap.get(o2), fMap.get(o1));
-            }
-        });
-        System.out.println("After sort:"+ openList);
-    }
 }

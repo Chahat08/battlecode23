@@ -28,7 +28,7 @@ public class RobotPlayer {
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
-        System.out.println("TYPE: "+rc.getType()+", HEALTH: "+rc.getHealth());
+//        System.out.println("TYPE: "+rc.getType()+", HEALTH: "+rc.getHealth());
 
         // game loop
         while(true){
