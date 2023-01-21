@@ -2,6 +2,8 @@ package toph;
 
 import battlecode.common.*;
 import toph.MapSymmetry.SymmetryType;
+import toph.SharedArray.SharedArrayAccess;
+import toph.SharedArray.SharedArrayAccessImpl;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -30,6 +32,8 @@ public class RobotPlayer {
         put(2, SymmetryType.VERTICAL);
         //put(3, SymmetryType.ROTATIONAL);
     }};
+
+    static final SharedArrayAccess sharedArray = new SharedArrayAccessImpl();
 
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
