@@ -40,6 +40,7 @@ public class CarrierStrategy {
             firstTurn(rc);
             rc.setIndicatorString("Focus well at " + wellLoc);
         }
+
         // check if our island loc is already ours
         if(islandLoc != null && rc.canSenseLocation(islandLoc)){
             Team team = rc.senseTeamOccupyingIsland(rc.senseIsland(islandLoc));

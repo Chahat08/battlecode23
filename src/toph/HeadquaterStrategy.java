@@ -71,7 +71,7 @@ public class HeadquaterStrategy {
         if(rc.canBuildAnchor(Anchor.STANDARD) && rc.getNumAnchors(Anchor.STANDARD) < 3 && rc.getResourceAmount(ResourceType.ADAMANTIUM) > 100) {
             rc.buildAnchor(Anchor.STANDARD);
             rc.setIndicatorString("BUILDING ANCHOR");
-
+            buildRobots = true;
         }
         else{
             if(rc.getNumAnchors(Anchor.STANDARD) == 0) {
