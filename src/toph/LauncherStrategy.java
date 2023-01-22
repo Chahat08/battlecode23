@@ -18,6 +18,7 @@ public class LauncherStrategy {
     static final int MAX_MOVES_PER_TURNCOUNT = 2;
     static final int MAX_ATTACKS_PER_TURNCOUNT = 3;
 
+    static MapLocation birthHQ=null;
 
     static MapLocation currentTargetLocation = null;
     static boolean reachedEnemyHQ = false;
@@ -33,7 +34,6 @@ public class LauncherStrategy {
             // launchers tasked to go to enemy hq
             // and explore things on the way
 
-            rc.setIndicatorString("ATTACK LAUNCHER");
 
             // TODO: CHANGE SYMMETRY/SET NEW TARGET BASED ON DETECTED SYMMETRY IF REACHED TARGET AND HQ NOT FOUND
 
@@ -49,6 +49,9 @@ public class LauncherStrategy {
                 attackEnemies(rc);
             }
             if(!hasFinalisedSymmetry) tryToFinaliseOrChangeSymmetry(rc);
+            //System.out.println("attack, "+turnCount+", "+currentTargetLocation);
+            rc.setIndicatorString("ATTACK LAUNCHER, target: "+currentTargetLocation);
+
 
         }
         else{
@@ -56,11 +59,12 @@ public class LauncherStrategy {
             // Launchers tasked to defend our headquaters
             // remain near it and kill enemies approaching it
 
-            rc.setIndicatorString("DEFENSE LAUNCHER");
 
             if(turnCount==1) defenseLaunchersFirstTurnCountRoutine(rc);
             attackEnemies(rc);
             moveRandomlyNearOurHQ(rc);
+            rc.setIndicatorString("DEFENSE LAUNCHER, target: "+currentTargetLocation);
+            //System.out.println("def, "+turnCount+", "+currentTargetLocation);
         }
     }
 
@@ -75,7 +79,8 @@ public class LauncherStrategy {
 
             symmetryType = SharedArrayWork.readCurrentLauncherSymmetryType(rc);
             SharedArrayWork.writeIncreaseCurrentLauncherSymmetryType(rc, symmetryType);
-            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), symmetryType);
+            birthHQ = getBirthHQLocation(rc);
+            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, birthHQ, symmetryType);
 
             // TODO: fix these null checks for symmetry detection
 //            do {
@@ -87,6 +92,7 @@ public class LauncherStrategy {
         } else {
             // we can detect enemy HQ corresponding to this one, since symmetry is known, set it as target
             currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), SharedArrayWork.readMapSymmetry(rc));//MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), MapSymmetry.MAP_SYMMETRY_TYPE);
+            hasFinalisedSymmetry=true;
         }
     }
 
@@ -156,7 +162,7 @@ public class LauncherStrategy {
 
         RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
 
-        if (enemies.length >= 0) { // enemies found
+        if (enemies.length > 0) { // enemies found
             for (RobotInfo enemy : enemies) {
                 // TODO: this is not it
                 if (enemy.getType() == RobotType.HEADQUARTERS){
@@ -180,25 +186,14 @@ public class LauncherStrategy {
         // change symmetry to send bots,if symmetry has already been detected
         if(symmetry!=null){
             symmetryType = symmetry;
-            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, currentTargetLocation, symmetryType);
+            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, birthHQ, symmetryType);
             hasFinalisedSymmetry=true;
             return;
         }
         if(rc.canSenseRobotAtLocation(currentTargetLocation)) {
-            System.out.println("haha");
-            System.out.println(currentTargetLocation);
             RobotInfo bot = rc.senseRobotAtLocation(currentTargetLocation);
             if (bot.getType() == RobotType.HEADQUARTERS) {
-                System.out.println("here");
                 SharedArrayWork.writeMapSymmetry(rc, symmetryType);
-                System.out.println("-------------------------------");
-                System.out.println("!!!!!!!!MAP SYMMETRY SET!!!!!!!");
-                MapSymmetry.SymmetryType symmet = SharedArrayWork.readMapSymmetry(rc);
-                if (symmet == MapSymmetry.SymmetryType.ROTATIONAL)
-                    System.out.println("ROTATION");
-                if (symmet == MapSymmetry.SymmetryType.HORIZONTAL) System.out.println("HORI");
-                if (symmet == MapSymmetry.SymmetryType.VERTICAL) System.out.println("VERTI");
-                System.out.println("-------------------------------");
                 hasFinalisedSymmetry = true;
             }
         }

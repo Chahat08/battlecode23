@@ -22,7 +22,7 @@ public class SharedArrayWork {
 
     static int DEFENSE_LAUNCHER_RADIUS_LAST_INDEX=13;
 
-    static int CURRENT_AMPLIFIER_SYMMETRY_INDEX = 14;
+    //static int CURRENT_AMPLIFIER_SYMMETRY_INDEX = 14;
 
     // adamantium wells
     static int ADA_WELL_LOCATIONS_FIRST_INDEX = 21;
@@ -63,10 +63,12 @@ public class SharedArrayWork {
         return null;
     }
     public static void writeMapSymmetry(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
+        //System.out.println("called");
         if(!rc.canWriteSharedArray(0, 1)) return;
         if(symmetryType== MapSymmetry.SymmetryType.ROTATIONAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 1);
         if(symmetryType==MapSymmetry.SymmetryType.HORIZONTAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 2);
         if(symmetryType==MapSymmetry.SymmetryType.VERTICAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 3);
+        //System.out.println("SYMMETRY SET: "+readMapSymmetry(rc));
     }
 
     public static MapLocation[] readOurHQLocations(RobotController rc) throws GameActionException {
@@ -228,21 +230,21 @@ public class SharedArrayWork {
         }
     }
 
-    public static MapSymmetry.SymmetryType readCurrentAmplifierSymmetryType(RobotController rc) throws GameActionException{
-        if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==1) return MapSymmetry.SymmetryType.ROTATIONAL;
-        else if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==2) return MapSymmetry.SymmetryType.HORIZONTAL;
-        return MapSymmetry.SymmetryType.VERTICAL;
-    }
-
-    public static void writeIncreaseCurrentAmplifierSymmetryType(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
-        if(rc.canWriteSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1)){
-            if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
-                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 2);
-            else if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
-                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 3);
-            else
-                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1);
-        }
-    }
+//    public static MapSymmetry.SymmetryType readCurrentAmplifierSymmetryType(RobotController rc) throws GameActionException{
+//        if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==1) return MapSymmetry.SymmetryType.ROTATIONAL;
+//        else if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==2) return MapSymmetry.SymmetryType.HORIZONTAL;
+//        return MapSymmetry.SymmetryType.VERTICAL;
+//    }
+//
+//    public static void writeIncreaseCurrentAmplifierSymmetryType(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
+//        if(rc.canWriteSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1)){
+//            if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
+//                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 2);
+//            else if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
+//                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 3);
+//            else
+//                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1);
+//        }
+//    }
 
 }
