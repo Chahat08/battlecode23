@@ -2,9 +2,15 @@ package toph;
 
 import battlecode.common.*;
 
-import static toph.LauncherStrategy.getBirthHQLocation;
-import static toph.RobotPlayer.*;
 
+import java.util.HashMap;
+
+import static toph.LauncherStrategy.MAX_LAUNCHER_BOT_COUNT_PER_HQ;
+import static toph.MovementStrategy.moveRandom;
+import static toph.RobotPlayer.directions;
+import static toph.RobotPlayer.rng;
+import static toph.RobotPlayer.turnCount;
+import static toph.LauncherStrategy.getBirthHQLocation;
 public class AmplifierStrategy {
     static boolean isAtTargetLocation = false;
     static MapLocation currentTargetLocation = null;
@@ -14,6 +20,7 @@ public class AmplifierStrategy {
     static int MAX_MOVES_PER_TURNCOUNT = 2;
 
     static void runAmplifier(RobotController rc) throws GameActionException {
+
         if(turnCount==1) amplifierFirstTurnCountRoutine(rc);
         if(!isAtTargetLocation) moveToMyCurrentTargetLocation(rc);
         rc.setIndicatorString("target: "+currentTargetLocation);
@@ -83,6 +90,7 @@ public class AmplifierStrategy {
                 }
             }
         }
+
     }
 
 }

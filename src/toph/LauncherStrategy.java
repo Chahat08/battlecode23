@@ -2,13 +2,11 @@ package toph;
 
 import battlecode.common.*;
 
-import javax.xml.stream.Location;
 
-import java.util.ArrayList;
-import java.util.Map;
-
+import static toph.CarrierStrategy.scanHQ;
+import static toph.MovementStrategy.*;
 import static toph.RobotPlayer.*;
-
+import static toph.BotPrivateInfo.*;
 
 public class LauncherStrategy {
     static boolean hasFinalisedSymmetry = false;
@@ -25,11 +23,23 @@ public class LauncherStrategy {
     static MapSymmetry.SymmetryType symmetryType = null;
 
     static int mapWidth, mapHeight;
+    static boolean runback = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
+        if (!islandAlert) {
+            scanHQ(rc);
+            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
+            wallcollider(rc);
+            return;
+        }
+        if(islandAlert == true){
+            moveTowards(rc, hqLoc);
+            return;
+        }
 
         // let's have every 4th launcher we create remain near our hq for defense
         if(rc.getID()%DEFENSE_LAUNCHER_RATIO!=0) {
+
             // ATTACK LAUNCHERS
             // launchers tasked to go to enemy hq
             // and explore things on the way
@@ -60,6 +70,7 @@ public class LauncherStrategy {
             // remain near it and kill enemies approaching it
 
 
+
             if(turnCount==1) defenseLaunchersFirstTurnCountRoutine(rc);
             attackEnemies(rc);
             moveRandomlyNearOurHQ(rc);
@@ -68,8 +79,9 @@ public class LauncherStrategy {
         }
     }
 
-    static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
 
+    static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
+        scanHQ(rc);
         // SET THE CURRENT TARGET LOCATION TO A PLAUSIBLE HQ LOCATION
 
         if (SharedArrayWork.readMapSymmetry(rc) == null) {
@@ -97,8 +109,11 @@ public class LauncherStrategy {
     }
 
     static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
+
         currentTargetLocation = getBirthHQLocation(rc);
         mapHeight=rc.getMapHeight(); mapWidth=rc.getMapWidth();
+        scanHQ(rc);
+        currentTargetLocation=rc.getLocation();
     }
 
     static void moveToCurrentTargetLocation(RobotController rc) throws GameActionException{

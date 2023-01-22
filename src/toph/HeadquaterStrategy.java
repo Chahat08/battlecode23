@@ -18,6 +18,7 @@ public class HeadquaterStrategy {
 
     static Direction dir;
     static MapLocation newLoc;
+    static boolean buildRobots = false;
 
     static Map<Integer, RobotType>  botTypes = new HashMap<Integer, RobotType>() {{
         put(1, RobotType.LAUNCHER);
@@ -35,10 +36,13 @@ public class HeadquaterStrategy {
         if(turnCount==1) firstTurnCountRoutine(rc);
 
         // try to build an anchor every 50th turn?
-        if(turnCount%50==0) buildAnchor(rc);
+        if(turnCount%100==0 && turnCount > 5) buildAnchor(rc);
 
-        // lets build multiple bots
-        buildMultipleBots(rc);
+        if(buildRobots) {
+            // lets build multiple bots
+            buildMultipleBots(rc);
+        }
+
 
 
         // starvation strategy
@@ -67,6 +71,10 @@ public class HeadquaterStrategy {
         if(rc.canBuildAnchor(Anchor.STANDARD) && rc.getResourceAmount(ResourceType.ADAMANTIUM) > 100) {
             rc.buildAnchor(Anchor.STANDARD);
             rc.setIndicatorString("BUILDING ANCHOR");
+            buildRobots = true;
+        }
+        else{
+            buildRobots = false;
         }
     }
 
@@ -80,6 +88,8 @@ public class HeadquaterStrategy {
             // if possible build it else wait, posloc ensures it can be build n in that loc
             if(rc.isActionReady() && posloc != -1) iter = buildbot(rc, iter, posloc, createBot);
             else rc.setIndicatorString("WAITING");
+
+
         }
     }
 
