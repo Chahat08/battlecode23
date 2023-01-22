@@ -29,6 +29,18 @@ public class SharedArrayWork {
     static int ISLAND_LOCATIONS_FIRST_INDEX = 32;
     static int ISLAND_LOCATIONS_LAST_INDEX = 40;
 
+    static int ENEMY_ISLAND_LOCATIONS_FIRST_INDEX = 41;
+    static int ENEMY_ISLAND_LOCATIONS_LAST_INDEX = 45;
+
+    static int NEUTRAL_ISLAND_LOCATIONS_FIRST_INDEX = 46;
+    static int NEUTRAL_ISLAND_LOCATIONS_LAST_INDEX = 50;
+
+    static int CURRENT_LOCATIONS_FIRST_INDEX = 51;
+    static int CURRENT_LOCATIONS_LAST_INDEX = 55;
+    static int CLOUD_LOCATIONS_FIRST_INDEX = 56;
+    static int CLOUD_LOCATIONS_LAST_INDEX = 60;
+
+
     public static int locationToInt(RobotController rc, MapLocation m) {
         if (m == null) {
             return 0;
@@ -184,5 +196,68 @@ public class SharedArrayWork {
             }
         }
     }
+
+    // both current and cloud read in 1
+    public static MapLocation[] readData(RobotController rc, int TYPE) throws GameActionException {
+        ArrayList<MapLocation> locations = new ArrayList<>();
+        int start, end;
+        if(TYPE == 1){
+            start = CLOUD_LOCATIONS_FIRST_INDEX;
+            end = CLOUD_LOCATIONS_LAST_INDEX;
+            for(int i=start; i<=end; ++i){
+                int val = rc.readSharedArray(i);
+                if(val!=0) locations.add(intToLocation(rc, val));
+            }
+            return locations.toArray(new MapLocation[locations.size()]);
+        }
+        else if(TYPE == 2){
+            start = CURRENT_LOCATIONS_FIRST_INDEX;
+            end = CURRENT_LOCATIONS_LAST_INDEX;
+            for(int i=start; i<=end; ++i){
+                int val = rc.readSharedArray(i);
+                if(val!=0) locations.add(intToLocation(rc, val));
+            }
+            return locations.toArray(new MapLocation[locations.size()]);
+        }
+        else{
+            System.out.println("Invalid TYPE");
+            return null;
+        }
+
+
+
+    }
+
+    public static void writeData(RobotController rc, MapLocation location, int TYPE) throws GameActionException{
+        int start, end;
+        if(TYPE == 1){
+            start = CLOUD_LOCATIONS_FIRST_INDEX;
+            end = CLOUD_LOCATIONS_LAST_INDEX;
+            for(int i=start; i<=end; ++i){
+                int val = locationToInt(rc, location);
+                if (rc.readSharedArray(i) == val) return;
+                if(rc.readSharedArray(i)==0){
+                    if(rc.canWriteSharedArray(i, val))
+                        rc.writeSharedArray(i, val);
+                    return;
+                }
+            }
+        }
+        else if(TYPE == 2){
+            start = CURRENT_LOCATIONS_FIRST_INDEX;
+            end = CURRENT_LOCATIONS_LAST_INDEX;
+            for(int i=start; i<=end; ++i){
+                int val = locationToInt(rc, location);
+                if (rc.readSharedArray(i) == val) return;
+                if(rc.readSharedArray(i)==0){
+                    if(rc.canWriteSharedArray(i, val))
+                        rc.writeSharedArray(i, val);
+                    return;
+                }
+            }
+        }
+    }
+
+
 
 }

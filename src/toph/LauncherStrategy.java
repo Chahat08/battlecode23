@@ -2,8 +2,10 @@ package toph;
 
 import battlecode.common.*;
 
+import static toph.CarrierStrategy.scanHQ;
+import static toph.MovementStrategy.*;
 import static toph.RobotPlayer.*;
-
+import static toph.BotPrivateInfo.*;
 
 public class LauncherStrategy {
     static boolean isAtEnemyHQ = false;
@@ -17,16 +19,28 @@ public class LauncherStrategy {
 
     static MapLocation currentTargetLocation = null;
     static boolean reachedEnemyHQ = false;
+    static boolean runback = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
+        if (!islandAlert) {
+            scanHQ(rc);
+            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
+            wallcollider(rc);
+            return;
+        }
+        if(islandAlert == true){
+            moveTowards(rc, hqLoc);
+            return;
+        }
 
         // let's have every 4th launcher we create remain near our hq for defense
         if(rc.getID()%DEFENSE_LAUNCHER_RATIO!=0) {
+
             // ATTACK LAUNCHERS
             // launchers tasked to go to enemy hq
             // and explore things on the way
 
-            rc.setIndicatorString("ATTACK LAUNCHER");
+//            rc.setIndicatorString("ATTACK LAUNCHER");
 
             // TODO: CHANGE SYMMETRY/SET NEW TARGET BASED ON DETECTED SYMMETRY IF REACHED TARGET AND HQ NOT FOUND
 
@@ -48,7 +62,7 @@ public class LauncherStrategy {
             // Launchers tasked to defend our headquaters
             // remain near it and kill enemies approaching it
 
-            rc.setIndicatorString("DEFENSE LAUNCHER");
+//            rc.setIndicatorString("DEFENSE LAUNCHER");
 
             if(turnCount==1) defenseLaunchersFirstTurnCountRoutine(rc);
             attackEnemies(rc);
@@ -56,8 +70,9 @@ public class LauncherStrategy {
         }
     }
 
-    static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
 
+    static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
+        scanHQ(rc);
         // SET THE CURRENT TARGET LOCATION TO A PLAUSIBLE HQ LOCATION
 
         if (MapSymmetry.MAP_SYMMETRY_TYPE == null) {
@@ -75,6 +90,7 @@ public class LauncherStrategy {
     }
 
     static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
+        scanHQ(rc);
         currentTargetLocation=rc.getLocation();
     }
 
