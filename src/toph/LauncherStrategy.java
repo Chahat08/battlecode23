@@ -2,6 +2,11 @@ package toph;
 
 import battlecode.common.*;
 
+import javax.xml.stream.Location;
+
+import java.util.ArrayList;
+import java.util.Map;
+
 import static toph.RobotPlayer.*;
 
 
@@ -17,6 +22,8 @@ public class LauncherStrategy {
 
     static MapLocation currentTargetLocation = null;
     static boolean reachedEnemyHQ = false;
+
+    static int mapWidth, mapHeight;
 
     static void runLauncher(RobotController rc) throws GameActionException {
 
@@ -60,22 +67,31 @@ public class LauncherStrategy {
 
         // SET THE CURRENT TARGET LOCATION TO A PLAUSIBLE HQ LOCATION
 
-        if (MapSymmetry.MAP_SYMMETRY_TYPE == null) {
+        if (SharedArrayWork.readMapSymmetry(rc) == null) {
             // we dont yet know the symmetry type
             // pick a symmetry randomly, move to a plausible enemy HQ according to this info
             // TODO: rotational symmetry seems to be more freq. do a 2:1:1 ratio of picking it vs others
 
-            MapSymmetry.SymmetryType symmetryType = symmetries.get(rng.nextInt(symmetries.size()));
+            MapSymmetry.SymmetryType symmetryType = SharedArrayWork.readCurrentLauncherSymmetryType(rc);
+            SharedArrayWork.writeIncreaseCurrentLauncherSymmetryType(rc, symmetryType);
             currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), symmetryType);
+
+            // TODO: fix these null checks for symmetry detection
+//            do {
+//                MapSymmetry.SymmetryType symmetryType = SharedArrayWork.readCurrentLauncherSymmetryType(rc);
+//                SharedArrayWork.writeIncreaseCurrentLauncherSymmetryType(rc, symmetryType);
+//                currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), symmetryType);
+//            } while (currentTargetLocation==null);
 
         } else {
             // we can detect enemy HQ corresponding to this one, since symmetry is known, set it as target
-            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), MapSymmetry.MAP_SYMMETRY_TYPE);
+            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), SharedArrayWork.readMapSymmetry(rc));//MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), MapSymmetry.MAP_SYMMETRY_TYPE);
         }
     }
 
     static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
-        currentTargetLocation=rc.getLocation();
+        setCurrentTargetLocation(rc);
+        mapHeight=rc.getMapHeight(); mapWidth=rc.getMapWidth();
     }
 
     static void moveToCurrentTargetLocation(RobotController rc) throws GameActionException{
@@ -95,18 +111,45 @@ public class LauncherStrategy {
             }
         }
     }
+    static void setCurrentTargetLocation(RobotController rc) throws GameActionException{
+        MapLocation[] possibleHqLocs = SharedArrayWork.readOurHQLocations(rc);
+        for(int i=0; i<possibleHqLocs.length; ++i){
+            if(possibleHqLocs[i].isAdjacentTo(rc.getLocation())) {
+                currentTargetLocation = possibleHqLocs[i];
+                System.out.println("----------");
+                System.out.println(currentTargetLocation);
+                System.out.println("----------");
+                return;
+            }
+        }
+        currentTargetLocation=rc.getLocation();
+    }
 
+    static boolean checkLocationInMap(int x, int y){
+        if(x<0 || y<0|| x>=mapWidth || y>=mapHeight) return false;
+        return true;
+    }
+    static MapLocation pickRandomNewLocationNearHQ(RobotController rc) throws GameActionException{
+        int radius = SharedArrayWork.readDefenseLauncherRadius(rc, currentTargetLocation);
+        int x, y;
+        do{
+            int addX = rng.nextInt((radius - (-radius)) + 1) + (-radius);
+            int addY = rng.nextInt((radius - (-radius)) + 1) + (-radius);
+            x=currentTargetLocation.x+addX; y= currentTargetLocation.y+addY;
+        } while(checkLocationInMap(x, y));
+        return new MapLocation(x, y);
+    }
     static void moveRandomlyNearOurHQ(RobotController rc) throws GameActionException {
         // defense robots which will stay near our headquaters only
         int i=0;
-        while(i++<MAX_MOVES_PER_TURNCOUNT) {
+        //while(i++<MAX_MOVES_PER_TURNCOUNT) {
             while (true) { // just finding a random direction to move in, wonder if iterating is better
-                Direction dir = rc.getLocation().directionTo(currentTargetLocation.add(directions[rng.nextInt(directions.length)]));
+                Direction dir = rc.getLocation().directionTo(pickRandomNewLocationNearHQ(rc));
                 if (rc.canMove(dir)) {
                     rc.move(dir);
                     break;
                 }
-            }
+          //  }
         }
     }
 

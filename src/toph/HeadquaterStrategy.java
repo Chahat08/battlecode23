@@ -23,6 +23,8 @@ public class HeadquaterStrategy {
         put(3, RobotType.AMPLIFIER);
     }};
     static int MAX_BOTS_TO_BUILD_IN_ONE_TURNCOUNT = 2;
+    static int currentLauncherSymmetry=1;
+    static int INITIAL_DEFENSE_LAUNCHER_RADIUS=10;
     static int[] islands;
     static WellInfo[] wells;
     static MapInfo[] senseMapInfo;
@@ -49,8 +51,7 @@ public class HeadquaterStrategy {
 
 
         // TODO: put all info in shared array
-
-        MapSymmetry.setMapDimensions(rc.getMapHeight(), rc.getMapWidth());
+        SharedArrayWork.writeDefenseLauncherRadius(rc, INITIAL_DEFENSE_LAUNCHER_RADIUS, rc.getLocation());
     }
 
 
@@ -81,7 +82,13 @@ public class HeadquaterStrategy {
         dir = directions[posloc]; // direction to build
         newLoc = rc.getLocation().add(dir); // location to build
         if(rc.canBuildRobot(botTypes.get(createBot), newLoc))
+        {
             rc.buildRobot(botTypes.get(createBot), newLoc); // what and where
+            if(botTypes.get(createBot)==RobotType.LAUNCHER) {
+                currentLauncherSymmetry+=1;
+                if(currentLauncherSymmetry>symmetries.size()) currentLauncherSymmetry=1;
+            }
+        }
 
         return (iter >= startingStrategy.length-1) ? 0 : iter + 1; // iter control
     }

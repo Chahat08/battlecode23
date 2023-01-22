@@ -20,13 +20,6 @@ public class MapSymmetry {
     // all classes can look up the type from here
     public static SymmetryType MAP_SYMMETRY_TYPE = null;
 
-    private static int MAP_WIDTH=30;
-    private static int MAP_HEIGHT=30;
-
-    public static void setMapDimensions(int height, int width) {
-        MAP_HEIGHT = height;
-        MAP_WIDTH = width;
-    }
 
     // to detect symmetry, except some cases where things lie on axes,
     // we can pretty much confirm what type of symmetry we have soon as we find an enemy HQ
@@ -47,17 +40,23 @@ public class MapSymmetry {
 
 
     private static MapLocation getRotationalSymmetricalMapLocation(RobotController rc, MapLocation location) {
+        int MAP_WIDTH=rc.getMapWidth(); int MAP_HEIGHT=rc.getMapHeight();
         MapLocation loc = new MapLocation(MAP_WIDTH- location.x-1, MAP_HEIGHT-location.y-1);
+//        if(loc.x<0 || loc.y<0 || loc.x>=MAP_WIDTH || loc.y<=MAP_HEIGHT) return null;
         return loc;
     }
 
     private static MapLocation getHorizontalSymmetricalMapLocation(RobotController rc, MapLocation location) {
+        int MAP_HEIGHT=rc.getMapHeight(); int MAP_WIDTH=rc.getMapWidth();
         MapLocation loc = new MapLocation(location.x, MAP_HEIGHT- location.y-1);
+//        if(loc.x<0 || loc.y<0 || loc.x>=MAP_WIDTH || loc.y<=MAP_HEIGHT) return null;
         return loc;
     }
 
     private static MapLocation getVerticalSymmetricalMapLocation(RobotController rc, MapLocation location) {
+        int MAP_WIDTH=rc.getMapWidth();  int MAP_HEIGHT=rc.getMapHeight();
         MapLocation loc = new MapLocation(MAP_WIDTH- location.x-1, location.y);
+//        if(loc.x<0 || loc.y<0 || loc.x>=MAP_WIDTH || loc.y<=MAP_HEIGHT) return null;
         return loc;
     }
 
