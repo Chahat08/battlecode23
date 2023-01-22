@@ -17,22 +17,12 @@ public class MapSymmetry {
         VERTICAL
     }
 
-    // all classes can look up the type from here
-    public static SymmetryType MAP_SYMMETRY_TYPE = null;
-
-
-    // to detect symmetry, except some cases where things lie on axes,
-    // we can pretty much confirm what type of symmetry we have soon as we find an enemy HQ
-    public static void detectMapSymmetry(RobotController rc){
-
-    }
-
     public static MapLocation getSymmetricalMapLocation(RobotController rc, MapLocation location, SymmetryType symmetryType){
         if(symmetryType==SymmetryType.ROTATIONAL)
             return getRotationalSymmetricalMapLocation(rc, location);
 
         else if(symmetryType==SymmetryType.HORIZONTAL)
-            return getRotationalSymmetricalMapLocation(rc, location);
+            return getHorizontalSymmetricalMapLocation(rc, location);
 
         else
             return getVerticalSymmetricalMapLocation(rc, location);

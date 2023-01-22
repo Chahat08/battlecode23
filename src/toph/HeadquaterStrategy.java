@@ -13,7 +13,8 @@ import static toph.RobotPlayer.*;
 public class HeadquaterStrategy {
     static int iter = 0;
     // 3:1 launcher:carrier creation ratio in the beginning of the game
-    static final int[] startingStrategy = {2,2, 1,1,1,1,3};
+    static final int[] startingStrategy = {2,2, 1,3,1,3,1,3,1};
+    static final int[] secondStrategy = {2,2, 1,1,3,1,1};
     static Direction dir;
     static MapLocation newLoc;
 
@@ -70,7 +71,9 @@ public class HeadquaterStrategy {
     static void buildMultipleBots(RobotController rc) throws GameActionException{
         int i=0;
         while(i++<MAX_BOTS_TO_BUILD_IN_ONE_TURNCOUNT){
-            int createBot = startingStrategy[iter]; // what to build
+            int createBot = 0;
+            if(turnCount<200) createBot = startingStrategy[iter]; // what to build
+            else createBot = secondStrategy[iter]; // what to build
             int posloc = findbuildableloc(rc, botTypes.get(createBot)); // where to build
             // if possible build it else wait, posloc ensures it can be build n in that loc
             if(rc.isActionReady() && posloc != -1) iter = buildbot(rc, iter, posloc, createBot);
