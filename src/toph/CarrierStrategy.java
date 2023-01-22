@@ -19,17 +19,19 @@ public class CarrierStrategy {
     static boolean anchorMode = false;
 
     static boolean randomWellPick= false;
+
+    static boolean adaormana = false;
     // carry resources if near hq, well
     // attack-> throws resources at enemies
     // used to put anchors on sky islands
     // get slower with amount carried
     static void runCarrier(RobotController rc) throws GameActionException {
-//        if (rc.getID() % 5 == 1 && islandAlert == false) {
-//            scanHQ(rc);
-//            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
-//            wallcollider(rc);
-//            return;
-//        }
+        if (rc.getID() % 10 == 1 && islandAlert == false) {
+            scanHQ(rc);
+            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
+            wallcollider(rc);
+            return;
+        }
         if(islandAlert == true){
             moveTowards(rc, hqLoc);
             return;
@@ -47,21 +49,21 @@ public class CarrierStrategy {
             if(team == rc.getTeam()){
                 // we have the island, we can go home
                 anchorMode = false;
-                firstTurn2(rc);
+                pickClosestWell(rc);
             }
         }
 
+        if(wellLoc != null) pickClosestWell(rc);
+        if(anchorMode == false && turnCount == 30 && turnCount< 500 ){
+            pickWellOfType(rc, ResourceType.MANA);
+            rc.setIndicatorString("Refocus well at " + wellLoc);
+        }
+        else if(turnCount > 500 && anchorMode == false && turnCount % 100 == 0){
+            // we have been here for a while, lets go home
+            pickAnyWell(rc);
+            rc.setIndicatorString("Refocus well at " + wellLoc);
+        }
 
-        if(anchorMode == false && randomWellPick == true && wellLoc != null && turnCount%200==0 && turnCount >2 && wellLoc.isWithinDistanceSquared( hqLoc,50)){
-            // repurpose well to diff well!!
-            firstTurn1(rc);
-//            rc.setIndicatorString("Refocus well at " + wellLoc);
-        }
-        if(anchorMode == false && randomWellPick == false && wellLoc != null && turnCount%200==0 && turnCount >2 && wellLoc.isWithinDistanceSquared( hqLoc,50)){
-            // repurpose well to diff well!!
-            firstTurn2(rc);
-//            rc.setIndicatorString("Refocus well at " + wellLoc);
-        }
 
         //Collect from well if close and inventory not full
         if(wellLoc != null && rc.canCollectResource(wellLoc, -1)) rc.collectResource(wellLoc, -1);
@@ -102,7 +104,7 @@ public class CarrierStrategy {
                         rc.placeAnchor();
                         anchorMode = false;
                         backforthMode = false;
-                        firstTurn2(rc);
+                        pickClosestWell(rc);
                     }
 
 //                    rc.setIndicatorString("No islands found");
@@ -116,7 +118,7 @@ public class CarrierStrategy {
                 rc.placeAnchor();
                 anchorMode = false;
                 backforthMode = false;
-                firstTurn2(rc);
+                pickClosestWell(rc);
             }
         }
 
@@ -153,12 +155,15 @@ public class CarrierStrategy {
     }
 
     static void firstTurn(RobotController rc) throws GameActionException {
+        adaormana = rng.nextBoolean();
+        ResourceType type = adaormana ? ResourceType.ADAMANTIUM : ResourceType.MANA;
 
         scanHQ(rc);
-        MapLocation[] wells = SharedArrayWork.readWellLocations(rc);
+        MapLocation[] wells = SharedArrayWork.readWellLocationsOfType(rc, type);
         if(wells.length>0){
             MapLocation closest = wells[0];
             for(MapLocation well: wells){
+
                 if (well.distanceSquaredTo(hqLoc) < closest.distanceSquaredTo(hqLoc)){
                     closest = well;
                 }
@@ -174,7 +179,7 @@ public class CarrierStrategy {
         }
     }
 
-    static void firstTurn1(RobotController rc) throws GameActionException {
+    static void pickAnyWell(RobotController rc) throws GameActionException {
         MapLocation[] wells = SharedArrayWork.readWellLocations(rc);
         if(wells.length>0){
 
@@ -184,10 +189,11 @@ public class CarrierStrategy {
             update(rc, hqLoc, wellLoc);
         }
         else{
-//            rc.setIndicatorString("No wells found");
+            rc.setIndicatorString("No wells found");
         }
     }
-    static void firstTurn2(RobotController rc) throws GameActionException {
+
+    static void pickClosestWell(RobotController rc) throws GameActionException {
         MapLocation[] wells = SharedArrayWork.readWellLocations(rc);
         if(wells.length>0){
             MapLocation closest = wells[0];
@@ -202,7 +208,25 @@ public class CarrierStrategy {
             update(rc, hqLoc, wellLoc);
         }
         else{
-//            rc.setIndicatorString("No wells found");
+            rc.setIndicatorString("No wells found");
+        }
+    }
+    static void pickWellOfType(RobotController rc, ResourceType type) throws GameActionException {
+        MapLocation[] wells = SharedArrayWork.readWellLocationsOfType(rc, type);
+        if(wells.length>0){
+            MapLocation closest = wells[0];
+            for(MapLocation well: wells){
+                if (well.distanceSquaredTo(hqLoc) < closest.distanceSquaredTo(hqLoc)){
+                    closest = well;
+                }
+            }
+            wellLoc= closest;
+            findMode = true;
+            backforthMode = true;
+            update(rc, hqLoc, wellLoc);
+        }
+        else{
+            rc.setIndicatorString("No wells found");
         }
     }
     static void scanHQ(RobotController rc) throws GameActionException {

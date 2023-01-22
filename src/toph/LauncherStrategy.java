@@ -26,12 +26,12 @@ public class LauncherStrategy {
     static boolean runback = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
-//        if (rc.getID() % 3 == 1 && !islandAlert) {
-//            scanHQ(rc);
-//            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
-//            wallcollider(rc);
-//            return;
-//        }
+        if (rc.getID() % 10 == 1 && !islandAlert) {
+            scanHQ(rc);
+            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
+            wallcollider(rc);
+            return;
+        }
         if(islandAlert == true){
             moveTowards(rc, hqLoc);
             return;
