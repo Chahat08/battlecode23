@@ -15,6 +15,7 @@ public class HeadquaterStrategy {
     // 3:1 launcher:carrier creation ratio in the beginning of the game
     static final int[] startingStrategy = {2,2, 1,3,1,3,1,3,1};
     static final int[] secondStrategy = {2,2, 1,1,3,1,1};
+
     static Direction dir;
     static MapLocation newLoc;
 
@@ -53,6 +54,7 @@ public class HeadquaterStrategy {
 
         // TODO: put all info in shared array
         SharedArrayWork.writeDefenseLauncherRadius(rc, INITIAL_DEFENSE_LAUNCHER_RADIUS, rc.getLocation());
+
     }
 
 

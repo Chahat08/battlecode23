@@ -1,7 +1,10 @@
 package toph;
 
-import battlecode.common.*;
-import javafx.beans.property.adapter.ReadOnlyJavaBeanObjectPropertyBuilder;
+
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.ResourceType;
+import battlecode.common.RobotController;
 import toph.MapSymmetry;
 
 import java.util.ArrayList;
@@ -53,6 +56,7 @@ public class SharedArrayWork {
         return new MapLocation(m % rc.getMapWidth(), m / rc.getMapWidth());
     }
 
+
     public static MapSymmetry.SymmetryType readMapSymmetry(RobotController rc) throws GameActionException{
         int symm = rc.readSharedArray(MAP_SYMMETRY_INDEX);
         if(symm!=0){
@@ -62,6 +66,7 @@ public class SharedArrayWork {
         }
         return null;
     }
+
     public static void writeMapSymmetry(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
         //System.out.println("called");
         if(!rc.canWriteSharedArray(0, 1)) return;
@@ -69,6 +74,7 @@ public class SharedArrayWork {
         if(symmetryType==MapSymmetry.SymmetryType.HORIZONTAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 2);
         if(symmetryType==MapSymmetry.SymmetryType.VERTICAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 3);
         //System.out.println("SYMMETRY SET: "+readMapSymmetry(rc));
+
     }
 
     public static MapLocation[] readOurHQLocations(RobotController rc) throws GameActionException {
