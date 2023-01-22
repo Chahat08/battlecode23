@@ -6,60 +6,52 @@ import common.communication.Write;
 
 import java.util.HashMap;
 
-import static toph.LauncherStrategy.MAX_LAUNCHER_BOT_COUNT_PER_HQ;
-import static toph.RobotPlayer.directions;
-import static toph.RobotPlayer.rng;
+import static toph.LauncherStrategy.getBirthHQLocation;
+import static toph.RobotPlayer.*;
 
 public class AmplifierStrategy {
     static boolean isAtEnemyHQ = false;
+    static MapLocation currentTargetLocation = null;
+
+    static int MAX_MOVES_PER_TURNCOUNT = 2;
 
     static void runAmplifier(RobotController rc) throws GameActionException {
-
-        // lets go park amplifiers by enemy hq
-
-        int radius = rc.getType().actionRadiusSquared;
-        Team opponent = rc.getTeam().opponent();
-
-        // try to sense enemy headquaters and write if found
-        MapLocation hqLocation = null;
-        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
-        if (enemies.length >= 0) { // enemies found
-            for (RobotInfo enemy : enemies) {
-                if (enemy.getType() == RobotType.HEADQUARTERS) { // headquater type found
-                    hqLocation = enemy.getLocation(); // write locally to move into it
-                    Write.addEnemyHQLocation(rc, enemy.getLocation()); // add to shared info
-                }
-            }
+        if(turnCount==1) amplifierFirstTurnCountRoutine(rc);
+        if(!isAtEnemyHQ) moveToMyCurrentTargetLocation(rc);
+    }
+    static void amplifierFirstTurnCountRoutine(RobotController rc) throws GameActionException{
+        if(SharedArrayWork.readMapSymmetry(rc)==null){
+            MapSymmetry.SymmetryType symmetryType = SharedArrayWork.readCurrentAmplifierSymmetryType(rc);
+            SharedArrayWork.writeIncreaseCurrentAmplifierSymmetryType(rc, symmetryType);
+            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), symmetryType);
+        }
+        else {
+            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), SharedArrayWork.readMapSymmetry(rc));
         }
 
-        HashMap<Integer, MapLocation> enemyHQs = Read.readEnemyHQLocations(rc);
-
-        if(!enemyHQs.isEmpty()){
-            rc.setIndicatorString("enemy hq found!");
-            for(MapLocation enemyHQ :enemyHQs.values()){
-                if(Read.readEnemyHQLauncherBotCount(rc, enemyHQ)<=MAX_LAUNCHER_BOT_COUNT_PER_HQ) {
-                    hqLocation = enemyHQ;
-                    break;
-                }
-            }
-        }
-
-        if(hqLocation!=null){
-            // if enemy hq found, go there
-            if(rc.canMove(rc.getLocation().directionTo(hqLocation))){
-                rc.move(rc.getLocation().directionTo(hqLocation));
-            }
-            if(rc.canActLocation(hqLocation)){
-                if(rc.canWriteSharedArray(5, 1)) {
-                    Write.addToEnemyHQLauncherBotCount(rc, hqLocation);
-                }
-                isAtEnemyHQ = true;
-            }
-        } else { // else move randomly
-            Direction dir = directions[rng.nextInt(directions.length)];
-            if (rc.canMove(dir)) {
+        System.out.println("AMPLIFIER: "+currentTargetLocation);
+    }
+    static void moveToMyCurrentTargetLocation(RobotController rc) throws GameActionException{
+        Direction dir = rc.getLocation().directionTo(currentTargetLocation);
+        int i=0;
+        while(i++<MAX_MOVES_PER_TURNCOUNT) {
+            if (rc.canMove(dir))
                 rc.move(dir);
+            else {// TODO: pathfinding otherwise, move randomly for now
+                while(true){ // just finding a random direction to move in, wonder if iterating is better
+                    dir = directions[rng.nextInt(directions.length)];
+                    if (rc.canMove(dir)) {
+                        rc.move(dir);
+                        break;
+                    }
+                }
             }
+        }
+        if(rc.canSenseRobotAtLocation(currentTargetLocation)){
+            RobotInfo info = rc.senseRobotAtLocation(currentTargetLocation);
+            if(info.getType().equals(RobotType.HEADQUARTERS))
+                isAtEnemyHQ=true;
         }
     }
+
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static javax.swing.UIManager.put;
+import static toph.AmplifierStrategy.runAmplifier;
 import static toph.CarrierStrategy.runCarrier;
 import static toph.HeadquaterStrategy.runHeadquaters;
 import static toph.LauncherStrategy.runLauncher;
@@ -49,26 +50,26 @@ public class RobotPlayer {
 //            if(turnCount==1) report(rc);
             if(rc.getType() == RobotType.HEADQUARTERS){
 
-                System.out.println("HEADQUARTERS report:");
+                //System.out.println("HEADQUARTERS report:");
                 MapLocation[] hqlocs = readOurHQLocations(rc);
-                System.out.println("My HQs: ");
+//                System.out.println("My HQs: ");
                 for(MapLocation loc: hqlocs){
-                    System.out.println("HQ: "+loc);
+//                    System.out.println("HQ: "+loc);
                 }
-                System.out.println("Enemies: ");
+//                System.out.println("Enemies: ");
                 MapLocation[] enemyHQLocs = readEnemyHQLocations(rc);
                 for(MapLocation loc: enemyHQLocs){
-                    System.out.println("ENEMY HQ: "+loc);
+//                    System.out.println("ENEMY HQ: "+loc);
                 }
                 MapLocation[] wells = readWellLocations(rc);
-                System.out.println("Wells: ");
+//                System.out.println("Wells: ");
                 for(MapLocation well : wells){
-                    System.out.println(well);
+//                    System.out.println(well);
                 }
                 MapLocation[] islands = readIslandLocations(rc);
-                System.out.println("Islands: ");
+//                System.out.println("Islands: ");
                 for(MapLocation island : islands){
-                    System.out.println(island);
+//                    System.out.println(island);
                 }
             }
 
@@ -85,7 +86,7 @@ public class RobotPlayer {
                     case DESTABILIZER:
                         //runLauncher(rc); break; // do something
                     case AMPLIFIER:
-                        //runAmplifier(rc); break;
+                        runAmplifier(rc); break;
                 }
             } catch(GameActionException e){
                 e.printStackTrace();
