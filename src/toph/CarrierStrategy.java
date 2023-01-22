@@ -24,12 +24,12 @@ public class CarrierStrategy {
     // used to put anchors on sky islands
     // get slower with amount carried
     static void runCarrier(RobotController rc) throws GameActionException {
-        if (rc.getID() % 3 == 1 && islandAlert == false) {
-            scanHQ(rc);
-            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
-            wallcollider(rc);
-            return;
-        }
+//        if (rc.getID() % 5 == 1 && islandAlert == false) {
+//            scanHQ(rc);
+//            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
+//            wallcollider(rc);
+//            return;
+//        }
         if(islandAlert == true){
             moveTowards(rc, hqLoc);
             return;
@@ -40,7 +40,15 @@ public class CarrierStrategy {
             firstTurn(rc);
             rc.setIndicatorString("Focus well at " + wellLoc);
         }
-
+        // check if our island loc is already ours
+        if(islandLoc != null && rc.canSenseLocation(islandLoc)){
+            Team team = rc.senseTeamOccupyingIsland(rc.senseIsland(islandLoc));
+            if(team == rc.getTeam()){
+                // we have the island, we can go home
+                anchorMode = false;
+                firstTurn2(rc);
+            }
+        }
 
 
         if(anchorMode == false && randomWellPick == true && wellLoc != null && turnCount%200==0 && turnCount >2 && wellLoc.isWithinDistanceSquared( hqLoc,50)){
@@ -111,7 +119,7 @@ public class CarrierStrategy {
             }
         }
 
-        if(rc.canTakeAnchor(hqLoc, Anchor.STANDARD)) {
+        if(rc.canTakeAnchor(hqLoc, Anchor.STANDARD) && rc.getNumAnchors(Anchor.STANDARD) == 0) {
             rc.takeAnchor(hqLoc, Anchor.STANDARD);
             anchorMode = true;
 //            rc.setIndicatorString("Taking anchor");
