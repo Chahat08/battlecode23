@@ -1,9 +1,7 @@
 package toph;
 
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.ResourceType;
-import battlecode.common.RobotController;
+import battlecode.common.*;
+import javafx.beans.property.adapter.ReadOnlyJavaBeanObjectPropertyBuilder;
 import toph.MapSymmetry;
 
 import java.util.ArrayList;
@@ -17,6 +15,13 @@ public class SharedArrayWork {
 
     static int ENEMY_HQ_LOCATIONS_FIRST_INDEX = 5;
     static int ENEMY_HQ_LOCATIONS_LAST_INDEX = 8;
+
+    static int CURRENT_LAUNCHER_SYMMETRY_INDEX = 9;
+
+    static int DEFENSE_LAUNCHER_RADIUS_FIRST_INDEX = 10;
+
+    static int DEFENSE_LAUNCHER_RADIUS_LAST_INDEX=13;
+
     // adamantium wells
     static int ADA_WELL_LOCATIONS_FIRST_INDEX = 21;
     static int ADA_WELL_LOCATIONS_LAST_INDEX = 25;
@@ -28,6 +33,7 @@ public class SharedArrayWork {
     // island locations
     static int ISLAND_LOCATIONS_FIRST_INDEX = 32;
     static int ISLAND_LOCATIONS_LAST_INDEX = 40;
+
 
     public static int locationToInt(RobotController rc, MapLocation m) {
         if (m == null) {
@@ -45,7 +51,7 @@ public class SharedArrayWork {
         return new MapLocation(m % rc.getMapWidth(), m / rc.getMapWidth());
     }
 
-    public MapSymmetry.SymmetryType readMapSymmetry(RobotController rc) throws GameActionException{
+    public static MapSymmetry.SymmetryType readMapSymmetry(RobotController rc) throws GameActionException{
         int symm = rc.readSharedArray(MAP_SYMMETRY_INDEX);
         if(symm!=0){
             if(symm==1) return MapSymmetry.SymmetryType.ROTATIONAL;
@@ -54,7 +60,7 @@ public class SharedArrayWork {
         }
         return null;
     }
-    public void writeMapSymmetry(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
+    public static void writeMapSymmetry(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
         if(!rc.canWriteSharedArray(0, 1)) return;
         if(symmetryType== MapSymmetry.SymmetryType.ROTATIONAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 1);
         if(symmetryType==MapSymmetry.SymmetryType.HORIZONTAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 2);
@@ -181,6 +187,41 @@ public class SharedArrayWork {
                 if(rc.canWriteSharedArray(i, val))
                     rc.writeSharedArray(i, val);
                 return;
+            }
+        }
+    }
+
+    public static MapSymmetry.SymmetryType readCurrentLauncherSymmetryType(RobotController rc) throws GameActionException{
+        if(rc.readSharedArray(CURRENT_LAUNCHER_SYMMETRY_INDEX)==1) return MapSymmetry.SymmetryType.ROTATIONAL;
+        else if(rc.readSharedArray(CURRENT_LAUNCHER_SYMMETRY_INDEX)==2) return MapSymmetry.SymmetryType.HORIZONTAL;
+        return MapSymmetry.SymmetryType.VERTICAL;
+    }
+
+    public static void writeIncreaseCurrentLauncherSymmetryType(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
+        if(rc.canWriteSharedArray(CURRENT_LAUNCHER_SYMMETRY_INDEX, 1)){
+            if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
+                rc.writeSharedArray(CURRENT_LAUNCHER_SYMMETRY_INDEX, 2);
+            else if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
+                rc.writeSharedArray(CURRENT_LAUNCHER_SYMMETRY_INDEX, 3);
+            else
+                rc.writeSharedArray(CURRENT_LAUNCHER_SYMMETRY_INDEX, 1);
+        }
+    }
+
+    public static int readDefenseLauncherRadius(RobotController rc, MapLocation hqLocation) throws GameActionException{
+        for(int i=OUR_HQ_LOCATIONS_FIRST_INDEX; i<OUR_HQ_LOCATIONS_LAST_INDEX; ++i){
+            if(locationToInt(rc, hqLocation)==rc.readSharedArray(i)){
+                return(rc.readSharedArray(DEFENSE_LAUNCHER_RADIUS_FIRST_INDEX+i-OUR_HQ_LOCATIONS_FIRST_INDEX));
+            }
+        }
+        return -1;
+    }
+    public static void writeDefenseLauncherRadius(RobotController rc, int radius, MapLocation hqLocation) throws GameActionException{
+        for(int i=OUR_HQ_LOCATIONS_FIRST_INDEX; i<OUR_HQ_LOCATIONS_LAST_INDEX; ++i){
+            if(locationToInt(rc, hqLocation)==rc.readSharedArray(i)){
+                int idx = DEFENSE_LAUNCHER_RADIUS_FIRST_INDEX+i-OUR_HQ_LOCATIONS_FIRST_INDEX;
+                if(rc.canWriteSharedArray(idx, radius))
+                    rc.writeSharedArray(idx, radius);
             }
         }
     }
