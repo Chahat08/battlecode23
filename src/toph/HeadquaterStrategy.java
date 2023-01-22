@@ -3,16 +3,17 @@ package toph;
 import battlecode.common.*;
 import common.communication.Write;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import static toph.RobotPlayer.directions;
-import static toph.RobotPlayer.turnCount;
+import toph.SharedArray.SharedArrayAccess;
+import static common.utils.Utils.locationToInt;
+import static toph.RobotPlayer.*;
 
 public class HeadquaterStrategy {
     static int iter = 0;
     // 3:1 launcher:carrier creation ratio in the beginning of the game
-    static final int[] startingStrategy = {1,1,1,1,2,2,2,2,3};
+    static final int[] startingStrategy = {2,2, 1,1,1,1,3};
     static Direction dir;
     static MapLocation newLoc;
 
@@ -26,7 +27,6 @@ public class HeadquaterStrategy {
     static WellInfo[] wells;
     static MapInfo[] senseMapInfo;
     static void runHeadquaters(RobotController rc) throws GameActionException {
-
         // things to do in first turnCount
         if(turnCount==1) firstTurnCountRoutine(rc);
 
@@ -35,25 +35,32 @@ public class HeadquaterStrategy {
 
         // lets build multiple bots
         buildMultipleBots(rc);
+
+
+        // starvation strategy
+        // check if resources are at a good level and do we need to stop feeding or what?
+
+        // communication strategy bus method
+        //Communication.tryWriteMessages(rc);
+
     }
 
     static void firstTurnCountRoutine(RobotController rc) throws GameActionException{
+
+
         // TODO: put all info in shared array
-
-        islands = rc.senseNearbyIslands();
-        wells = rc.senseNearbyWells();
-        senseMapInfo = rc.senseNearbyMapInfos(rc.getType().visionRadiusSquared);
-
-        Write.addOurHQLocation(rc);
 
         MapSymmetry.setMapDimensions(rc.getMapHeight(), rc.getMapWidth());
     }
 
+
+
     static void buildAnchor(RobotController rc) throws GameActionException {
         //TODO: if not able to build, send carriers to collect resources of types required to build
         // in +5 turnCount
+        // signal starvation of resources and change things accordingly
 
-        if(rc.canBuildAnchor(Anchor.STANDARD)) {
+        if(rc.canBuildAnchor(Anchor.STANDARD) && rc.getResourceAmount(ResourceType.ADAMANTIUM) > 100) {
             rc.buildAnchor(Anchor.STANDARD);
             rc.setIndicatorString("BUILDING ANCHOR");
         }

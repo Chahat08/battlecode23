@@ -135,7 +135,10 @@ public class LauncherStrategy {
 
     static void detectNearbyThings(RobotController rc) throws GameActionException {
             // TODO: detection logic
+
     }
+
+
 }
 
 
