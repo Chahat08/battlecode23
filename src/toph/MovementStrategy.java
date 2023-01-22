@@ -4,6 +4,8 @@ import battlecode.common.*;
 
 import java.util.*;
 
+
+import static toph.BotPrivateInfo.wallColiderDir;
 import static toph.RobotPlayer.directions;
 import static toph.RobotPlayer.rng;
 
@@ -256,6 +258,23 @@ public class MovementStrategy {
                     currentDirection = currentDirection.rotateLeft();
                 }
             }
+        }
+    }
+
+    static void wallcollider(RobotController rc) throws GameActionException {
+        if(rc.onTheMap(rc.adjacentLocation(wallColiderDir))){
+            MapInfo nextloc = rc.senseMapInfo(rc.adjacentLocation(wallColiderDir));
+            if(nextloc.getCurrentDirection() == wallColiderDir.opposite())
+                wallColiderDir = directions[rng.nextInt(directions.length)];
+            if(rc.canMove(wallColiderDir)){
+                rc.move(wallColiderDir);
+            }
+            else{
+                wallColiderDir = directions[rng.nextInt(directions.length)];
+            }
+        }
+        else {
+            wallColiderDir = directions[rng.nextInt(directions.length)];
         }
     }
 }
