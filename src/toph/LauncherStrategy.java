@@ -11,8 +11,7 @@ import static toph.RobotPlayer.*;
 
 
 public class LauncherStrategy {
-    static boolean isAtEnemyHQ = false;
-    static boolean didIncreaseCount = false;
+    static boolean hasFinalisedSymmetry = false;
 
     static final int DEFENSE_LAUNCHER_RATIO = 4;
     static final int MAX_LAUNCHER_BOT_COUNT_PER_HQ = 5;
@@ -22,6 +21,7 @@ public class LauncherStrategy {
 
     static MapLocation currentTargetLocation = null;
     static boolean reachedEnemyHQ = false;
+    static MapSymmetry.SymmetryType symmetryType = null;
 
     static int mapWidth, mapHeight;
 
@@ -48,6 +48,7 @@ public class LauncherStrategy {
             } else { // ATTACK every other turn
                 attackEnemies(rc);
             }
+            if(!hasFinalisedSymmetry) tryToFinaliseOrChangeSymmetry(rc);
 
         }
         else{
@@ -72,7 +73,7 @@ public class LauncherStrategy {
             // pick a symmetry randomly, move to a plausible enemy HQ according to this info
             // TODO: rotational symmetry seems to be more freq. do a 2:1:1 ratio of picking it vs others
 
-            MapSymmetry.SymmetryType symmetryType = SharedArrayWork.readCurrentLauncherSymmetryType(rc);
+            symmetryType = SharedArrayWork.readCurrentLauncherSymmetryType(rc);
             SharedArrayWork.writeIncreaseCurrentLauncherSymmetryType(rc, symmetryType);
             currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, rc.getLocation(), symmetryType);
 
@@ -116,9 +117,6 @@ public class LauncherStrategy {
         for(int i=0; i<possibleHqLocs.length; ++i){
             if(possibleHqLocs[i].isAdjacentTo(rc.getLocation())) {
                 currentTargetLocation = possibleHqLocs[i];
-                System.out.println("----------");
-                System.out.println(currentTargetLocation);
-                System.out.println("----------");
                 return;
             }
         }
@@ -174,6 +172,21 @@ public class LauncherStrategy {
             }
         }
 
+    }
+
+    static void tryToFinaliseOrChangeSymmetry(RobotController rc) throws GameActionException{
+        MapSymmetry.SymmetryType symmetry = SharedArrayWork.readMapSymmetry(rc);
+
+        // change symmetry to send bots,if symmetry has already been detected
+        if(symmetry!=null){
+            symmetryType = symmetry;
+            currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, currentTargetLocation, symmetryType);
+            hasFinalisedSymmetry=true;
+        }
+
+        if(currentTargetLocation.isWithinDistanceSquared(rc.getLocation(), RobotType.LAUNCHER.actionRadiusSquared)){
+
+        }
     }
 
     static void detectNearbyThings(RobotController rc) throws GameActionException {
