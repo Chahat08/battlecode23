@@ -22,6 +22,8 @@ public class SharedArrayWork {
 
     static int DEFENSE_LAUNCHER_RADIUS_LAST_INDEX=13;
 
+    static int CURRENT_AMPLIFIER_SYMMETRY_INDEX = 14;
+
     // adamantium wells
     static int ADA_WELL_LOCATIONS_FIRST_INDEX = 21;
     static int ADA_WELL_LOCATIONS_LAST_INDEX = 25;
@@ -223,6 +225,23 @@ public class SharedArrayWork {
                 if(rc.canWriteSharedArray(idx, radius))
                     rc.writeSharedArray(idx, radius);
             }
+        }
+    }
+
+    public static MapSymmetry.SymmetryType readCurrentAmplifierSymmetryType(RobotController rc) throws GameActionException{
+        if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==1) return MapSymmetry.SymmetryType.ROTATIONAL;
+        else if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==2) return MapSymmetry.SymmetryType.HORIZONTAL;
+        return MapSymmetry.SymmetryType.VERTICAL;
+    }
+
+    public static void writeIncreaseCurrentAmplifierSymmetryType(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
+        if(rc.canWriteSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1)){
+            if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
+                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 2);
+            else if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
+                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 3);
+            else
+                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1);
         }
     }
 
