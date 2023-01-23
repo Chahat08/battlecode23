@@ -29,6 +29,7 @@ public class AmplifierStrategy {
             symmetryType = SharedArrayWork.readCurrentLauncherSymmetryType(rc);
             //SharedArrayWork.writeIncreaseCurrentAmplifierSymmetryType(rc, symmetryType);
             currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), symmetryType);
+            detectEnemies(rc);
         }
         else {
             symmetrySet=true;
@@ -79,7 +80,7 @@ public class AmplifierStrategy {
                     }
                 }
             }
-            if(!symmetrySet) tryToSetSymmetry(rc);
+            //if(!symmetrySet) tryToSetSymmetry(rc);
         }
 
     }

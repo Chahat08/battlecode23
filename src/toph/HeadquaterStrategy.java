@@ -2,6 +2,7 @@ package toph;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,10 @@ public class HeadquaterStrategy {
             // lets build multiple bots
             buildMultipleBots(rc);
         }
+
+        // find nearby enemies so defense launchers can target and attack them
+        findNearbyEnemies(rc);
+
 
         // starvation strategy
         starvestrat(rc);
@@ -127,5 +132,15 @@ public class HeadquaterStrategy {
         else if(rc.getResourceAmount(ResourceType.ADAMANTIUM) > 200 && rc.getResourceAmount(ResourceType.MANA) > 200) {
             rc.writeSharedArray(starveloc, 0);
         }
+    }
+
+    static void findNearbyEnemies(RobotController rc) throws GameActionException {
+        RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().visionRadiusSquared, rc.getTeam().opponent());
+        ArrayList<MapLocation> enemyLocs = new ArrayList<>();
+        for(RobotInfo enemy:enemies){
+            if(!enemy.getType().equals(RobotType.HEADQUARTERS))
+                enemyLocs.add(enemy.getLocation());
+        }
+        toph.SharedArrayWork.writeHQSpottedEnemies(rc, enemyLocs.toArray(new MapLocation[enemyLocs.size()]));
     }
 }
