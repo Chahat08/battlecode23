@@ -5,7 +5,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.ResourceType;
 import battlecode.common.RobotController;
 
-import static toph.Constants.*;
+import static toph.Constants.myHqLoc;
+import static toph.Constants.rng;
 import static toph.MovementStrategy.*;
 
 public class CarrierStrategies {

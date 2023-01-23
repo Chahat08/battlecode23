@@ -1,15 +1,13 @@
 package toph;
 
 import battlecode.common.*;
-import common.communication.Write;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import toph.SharedArray.SharedArrayAccess;
-import static common.utils.Utils.locationToInt;
-import static toph.Constants.*;
-import static toph.RobotPlayer.*;
+
+import static toph.Constants.directions;
+import static toph.Constants.symmetries;
+import static toph.RobotPlayer.turnCount;
 import static toph.SharedArrayWork.writeOurHQLocation;
 
 public class HeadquaterStrategy {

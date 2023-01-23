@@ -1,16 +1,15 @@
 package toph;
 
-import battlecode.common.*;
-import toph.MapSymmetry.SymmetryType;
+import battlecode.common.Clock;
+import battlecode.common.GameActionException;
+import battlecode.common.RobotController;
 
-import static javax.swing.UIManager.put;
 import static toph.AmplifierStrategy.runAmplifier;
 import static toph.BotPrivateInfo.*;
 import static toph.CarrierStrategy.runCarrier;
-import static toph.Constants.*;
+import static toph.Constants.scanHQ;
 import static toph.HeadquaterStrategy.runHeadquaters;
 import static toph.LauncherStrategy.runLauncher;
-import static toph.SharedArrayWork.*;
 
 public class RobotPlayer {
     static int turnCount = 0;

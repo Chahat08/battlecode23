@@ -3,16 +3,11 @@ package toph;
 
 import battlecode.common.*;
 
-
-import java.util.*;
-
-import static common.utils.Utils.intToLocation;
-import static toph.BotPrivateInfo.*;
+import static toph.BotPrivateInfo.lastupdate;
 import static toph.CarrierStrategies.*;
 import static toph.Constants.*;
 import static toph.MovementStrategy.*;
-import static toph.RobotPlayer.*;
-import static toph.SharedArrayWork.*;
+import static toph.RobotPlayer.turnCount;
 public class CarrierStrategy {
 
     static boolean adaormana = false;

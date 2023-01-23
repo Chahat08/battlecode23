@@ -4,7 +4,6 @@ import battlecode.common.*;
 
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Map;
 
 public class Constants {
     // num of turns robot has been alive for

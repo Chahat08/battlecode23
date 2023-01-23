@@ -2,14 +2,10 @@ package toph;
 
 import battlecode.common.*;
 
-
-import java.util.HashMap;
-
-import static toph.LauncherStrategy.MAX_LAUNCHER_BOT_COUNT_PER_HQ;
-import static toph.MovementStrategy.moveRandom;
-import static toph.Constants.*;
-import static toph.RobotPlayer.turnCount;
+import static toph.Constants.directions;
+import static toph.Constants.rng;
 import static toph.LauncherStrategy.getBirthHQLocation;
+import static toph.RobotPlayer.turnCount;
 public class AmplifierStrategy {
     static boolean isAtTargetLocation = false;
     static MapLocation currentTargetLocation = null;

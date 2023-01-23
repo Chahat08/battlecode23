@@ -4,9 +4,7 @@ import battlecode.common.*;
 
 import static toph.Constants.directions;
 import static toph.Constants.rng;
-import static toph.MovementStrategy.*;
-import static toph.RobotPlayer.*;
-import static toph.BotPrivateInfo.*;
+import static toph.RobotPlayer.turnCount;
 
 public class LauncherStrategy {
     static boolean hasFinalisedSymmetry = false;
@@ -148,13 +146,13 @@ public class LauncherStrategy {
         // defense robots which will stay near our headquaters only
         int i=0;
         //while(i++<MAX_MOVES_PER_TURNCOUNT) {
-            while (true) { // just finding a random direction to move in, wonder if iterating is better
-                Direction dir = rc.getLocation().directionTo(pickRandomNewLocationNearHQ(rc));
-                if (rc.canMove(dir)) {
-                    rc.move(dir);
-                    break;
-                }
-          //  }
+        while (true) { // just finding a random direction to move in, wonder if iterating is better
+            Direction dir = rc.getLocation().directionTo(pickRandomNewLocationNearHQ(rc));
+            if (rc.canMove(dir)) {
+                rc.move(dir);
+                break;
+            }
+            //  }
         }
     }
 
@@ -171,7 +169,7 @@ public class LauncherStrategy {
                     reachedEnemyHQ = true;
                 }
                 else {
-                //if(isAtEnemyHQ){ //TODO: maybe try more than one attack
+                    //if(isAtEnemyHQ){ //TODO: maybe try more than one attack
                     // attack any other enemy bots detected
                     if(rc.canAttack(enemy.getLocation())){
                         rc.attack(enemy.getLocation());
@@ -202,12 +200,9 @@ public class LauncherStrategy {
     }
 
     static void detectNearbyThings(RobotController rc) throws GameActionException {
-            // TODO: detection logic
+        // TODO: detection logic
 
     }
 
 
 }
-
-
-

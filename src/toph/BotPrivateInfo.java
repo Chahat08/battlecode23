@@ -7,12 +7,6 @@ import java.util.Set;
 
 import static toph.CarrierStrategies.islandLoc;
 import static toph.CarrierStrategies.wellLoc;
-import static toph.CarrierStrategy.*;
-import static toph.Constants.myHqLoc;
-import static toph.LauncherStrategy.*;
-import static toph.MovementStrategy.backforthMode;
-import static toph.MovementStrategy.update;
-import static toph.RobotPlayer.*;
 import static toph.SharedArrayWork.*;
 
 public class BotPrivateInfo {
@@ -106,7 +100,7 @@ public class BotPrivateInfo {
                             enemyHQs.add(loc.getMapLocation());
                         }
                     }
-               }
+                }
 
             }
         }
