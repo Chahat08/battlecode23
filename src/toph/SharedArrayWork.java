@@ -318,7 +318,7 @@ public class SharedArrayWork {
     static void writeHQSpottedEnemies(RobotController rc, MapLocation[] enemyLocs) throws GameActionException{
 
         for(int i=HQ_SPOTTED_ENEMIES_FIRST_INDEX, j=0; i<=HQ_SPOTTED_ENEMIES_LAST_INDEX; ++i){
-            if(j++<enemyLocs.length) rc.writeSharedArray(i, locationToInt(rc, enemyLocs[j]));
+            if(j++<enemyLocs.length-1) rc.writeSharedArray(i, locationToInt(rc, enemyLocs[j]));
             else rc.writeSharedArray(i, 0);
         }
     }
