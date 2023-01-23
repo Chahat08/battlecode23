@@ -7,6 +7,7 @@ import battlecode.common.ResourceType;
 import battlecode.common.RobotController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SharedArrayWork {
     static int MAP_SYMMETRY_INDEX = 0;
@@ -24,7 +25,8 @@ public class SharedArrayWork {
 
     static int DEFENSE_LAUNCHER_RADIUS_LAST_INDEX=13;
 
-    //static int CURRENT_AMPLIFIER_SYMMETRY_INDEX = 14;
+    static int HQ_SPOTTED_ENEMIES_FIRST_INDEX = 14;
+    static int HQ_SPOTTED_ENEMIES_LAST_INDEX = 20;
 
     // adamantium wells
     static int ADA_WELL_LOCATIONS_FIRST_INDEX = 21;
@@ -49,7 +51,6 @@ public class SharedArrayWork {
     static int CURRENT_LOCATIONS_LAST_INDEX = 55;
     static int CLOUD_LOCATIONS_FIRST_INDEX = 56;
     static int CLOUD_LOCATIONS_LAST_INDEX = 60;
-
 
     public static int locationToInt(RobotController rc, MapLocation m) {
         if (m == null) {
@@ -309,23 +310,21 @@ public class SharedArrayWork {
         }
     }
 
+    static MapLocation[] readHQSpottedEnemies(RobotController rc) throws GameActionException{
+        ArrayList<MapLocation> locations = new ArrayList<>();
+        for(int i=HQ_SPOTTED_ENEMIES_FIRST_INDEX; i<=HQ_SPOTTED_ENEMIES_LAST_INDEX; ++i){
+            int currVal = rc.readSharedArray(i);
+            if(currVal!=0)
+                locations.add(intToLocation(rc, currVal));
+        }
+        return locations.toArray(new MapLocation[locations.size()]);
+    }
+    static void writeHQSpottedEnemies(RobotController rc, MapLocation[] enemyLocs) throws GameActionException{
 
-//    public static MapSymmetry.SymmetryType readCurrentAmplifierSymmetryType(RobotController rc) throws GameActionException{
-//        if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==1) return MapSymmetry.SymmetryType.ROTATIONAL;
-//        else if(rc.readSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX)==2) return MapSymmetry.SymmetryType.HORIZONTAL;
-//        return MapSymmetry.SymmetryType.VERTICAL;
-//    }
-//
-//    public static void writeIncreaseCurrentAmplifierSymmetryType(RobotController rc, MapSymmetry.SymmetryType symmetryType) throws GameActionException{
-//        if(rc.canWriteSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1)){
-//            if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
-//                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 2);
-//            else if(symmetryType.equals(MapSymmetry.SymmetryType.ROTATIONAL))
-//                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 3);
-//            else
-//                rc.writeSharedArray(CURRENT_AMPLIFIER_SYMMETRY_INDEX, 1);
-//        }
-//    }
-
+        for(int i=HQ_SPOTTED_ENEMIES_FIRST_INDEX, j=0; i<=HQ_SPOTTED_ENEMIES_LAST_INDEX; ++i){
+            if(j++<enemyLocs.length) rc.writeSharedArray(i, locationToInt(rc, enemyLocs[j]));
+            else rc.writeSharedArray(i, 0);
+        }
+    }
 
 }

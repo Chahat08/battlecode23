@@ -2,6 +2,8 @@ package stitch;
 
 import battlecode.common.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +38,7 @@ public class HeadquaterStrategy {
     }};
     static int MAX_BOTS_TO_BUILD_IN_ONE_TURNCOUNT = 2;
     static int currentLauncherSymmetry=1;
-    static int INITIAL_DEFENSE_LAUNCHER_RADIUS=10;
+    static int INITIAL_DEFENSE_LAUNCHER_RADIUS=5;
     static int[] islands;
     static WellInfo[] wells;
     static MapInfo[] senseMapInfo;
@@ -52,6 +54,7 @@ public class HeadquaterStrategy {
             buildMultipleBots(rc);
         }
 
+        findNearbyEnemies(rc);
 
 
         // starvation strategy
@@ -145,5 +148,15 @@ public class HeadquaterStrategy {
             if(rc.canBuildRobot(r, newLoc)) return i;
         }
         return -1;
+    }
+
+    static void findNearbyEnemies(RobotController rc) throws GameActionException {
+            RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().visionRadiusSquared, rc.getTeam().opponent());
+            ArrayList<MapLocation> enemyLocs = new ArrayList<>();
+            for(RobotInfo enemy:enemies){
+                if(!enemy.getType().equals(RobotType.HEADQUARTERS))
+                    enemyLocs.add(enemy.getLocation());
+            }
+            SharedArrayWork.writeHQSpottedEnemies(rc, enemyLocs.toArray(new MapLocation[enemyLocs.size()]));
     }
 }
