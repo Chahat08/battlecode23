@@ -26,16 +26,16 @@ public class LauncherStrategy {
     static boolean runback = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
-        if (rc.getID() % 10 == 1 && !islandAlert) {
-//            scanHQ(rc);
-            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
-            wallcollider(rc);
-            return;
-        }
-        if(islandAlert == true){
-            moveTowards(rc, hqLoc);
-            return;
-        }
+//        if (rc.getID() % 10 == 1 && !islandAlert) {
+////            scanHQ(rc);
+//            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
+//            wallcollider(rc);
+//            return;
+//        }
+//        if(islandAlert == true){
+//            moveTowards(rc, hqLoc);
+//            return;
+//        }
 
         // let's have every 4th launcher we create remain near our hq for defense
         if(rc.getID()%DEFENSE_LAUNCHER_RATIO!=0) {
