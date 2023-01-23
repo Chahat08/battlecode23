@@ -5,7 +5,10 @@ import battlecode.common.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static toph.CarrierStrategies.islandLoc;
+import static toph.CarrierStrategies.wellLoc;
 import static toph.CarrierStrategy.*;
+import static toph.Constants.myHqLoc;
 import static toph.LauncherStrategy.*;
 import static toph.MovementStrategy.backforthMode;
 import static toph.MovementStrategy.update;
@@ -13,21 +16,21 @@ import static toph.RobotPlayer.*;
 import static toph.SharedArrayWork.*;
 
 public class BotPrivateInfo {
+    // islands locs
     static Set<Integer> islandIdxs = new HashSet<>();
     static Set<MapLocation> neutralIslandLocs = new HashSet<>();
     static Set<MapLocation> ourIslandLocs = new HashSet<>();
     static Set<MapLocation> enemyIslandLocs = new HashSet<>();
 
-
+    static Set<MapLocation> enemyHQs = new HashSet<>();
+    static Set<MapLocation> ourHQs = new HashSet<>();
+    // mine locs
     static Set<MapLocation> AdawellLocs = new HashSet<>();
     static Set<MapLocation> ManawellLocs = new HashSet<>();
-
+    // locations of currents and clouds
     static Set<MapLocation> CurrentLocs = new HashSet<>();
-
     static Set<MapLocation> CloudLocs = new HashSet<>();
-
-    static Direction wallColiderDir = directions[rng.nextInt(8)];
-
+    static int lastupdate = 0;
     static void record(RobotController rc) throws GameActionException {
         // design a alert system
         try {
@@ -35,37 +38,37 @@ public class BotPrivateInfo {
             for(MapInfo loc: newLocs){
                 int id = rc.senseIsland(loc.getMapLocation());
                 if(id != -1){
+                    lastupdate = rc.getRoundNum();
                     Team team = rc.senseTeamOccupyingIsland(id);
                     MapLocation[] locs = rc.senseNearbyIslandLocations(id);
                     Team ourTeam = rc.getTeam();
                     Team enemyTeam = ourTeam.opponent();
-                    if(!islandIdxs.contains(id)){
-                        System.out.println("Island Noticed: " + id + " " + locs[0]);
-//                        if(rc.getID() == 11608){
-//                            System.out.println("Island Noticed: " + id + " " + locs[0]);
-//                        }
-                        islandAlert = true;
-                        islandIdxs.add(id);
-                    }
+                    islandIdxs.add(id);
                     if(team == Team.NEUTRAL){
                         for(MapLocation l: locs){
                             neutralIslandLocs.add(l);
+                            enemyIslandLocs.remove(l);
+                            ourIslandLocs.remove(l);
                         }
                     }
                     else if(team == ourTeam){
                         for(MapLocation l: locs){
                             ourIslandLocs.add(l);
+                            neutralIslandLocs.remove(l);
+                            enemyIslandLocs.remove(l);
                         }
                     }
                     else if(team == enemyTeam){
                         for(MapLocation l: locs){
                             enemyIslandLocs.add(l);
+                            ourIslandLocs.remove(l);
+                            neutralIslandLocs.remove(l);
                         }
                     }
+                    continue;
                 }
-
+                // add well locations
                 WellInfo well = rc.senseWell(loc.getMapLocation());
-
                 if(well != null){
                     if(well.getResourceType() == ResourceType.ADAMANTIUM){
                         AdawellLocs.add(loc.getMapLocation());
@@ -73,103 +76,95 @@ public class BotPrivateInfo {
                     else if(well.getResourceType() == ResourceType.MANA){
                         ManawellLocs.add(loc.getMapLocation());
                     }
+
+                    /// alert: uncoherent behavior
+                    if(rc.canCollectResource(loc.getMapLocation(), -1)) rc.collectResource(loc.getMapLocation(), -1);
+
+
+                    continue;
                 }
 
+                // add to cloud locs
                 if(loc.hasCloud()) {
                     CloudLocs.add(loc.getMapLocation());
+                    continue;
                 }
+
+                // add to current locs
                 if(loc.getCurrentDirection()!= Direction.CENTER) {
                     CurrentLocs.add(loc.getMapLocation());
                 }
+
+                if(rc.canSenseRobotAtLocation(loc.getMapLocation())){
+                    RobotInfo robot = rc.senseRobotAtLocation(loc.getMapLocation());
+                    if(robot.getType() == RobotType.HEADQUARTERS){
+                        if(robot.getTeam() == rc.getTeam()){
+                            ourHQs.add(loc.getMapLocation());
+                        }
+                        else{
+                            lastupdate = rc.getRoundNum();
+                            enemyHQs.add(loc.getMapLocation());
+                        }
+                    }
+               }
+
             }
         }
         catch(Exception e) {
             //  Block of code to handle errors
-            System.out.println("Exception: " + e);
+            System.out.println("Error recording private info");
         }
     }
 
-    static void reportOffline(RobotController rc) throws GameActionException {
-        for(MapLocation loc: neutralIslandLocs){
-            writeIslandLocation(rc, loc);
+    static void report(RobotController rc) throws GameActionException {
+        try {
+            for (MapLocation loc : neutralIslandLocs) {
+                writeIslandLocation(rc, loc);
+            }
+            for (MapLocation loc : ourIslandLocs) {
+                writeIslandLocation(rc, loc);
+            }
+            for (MapLocation loc : enemyIslandLocs) {
+                writeIslandLocation(rc, loc);
+            }
+            for (MapLocation loc : AdawellLocs) {
+                writeWellLocation(rc, loc, ResourceType.ADAMANTIUM);
+            }
+            for (MapLocation loc : ManawellLocs) {
+                writeWellLocation(rc, loc, ResourceType.MANA);
+            }
+            for (MapLocation loc : CurrentLocs) {
+                writeData(rc, loc, 1);
+            }
+            for (MapLocation loc : CloudLocs) {
+                writeData(rc, loc, 2);
+            }
+            for (MapLocation loc : enemyHQs) {
+                writeEnemyHQLocation(rc, loc);
+            }
+            for (MapLocation loc : ourHQs) {
+                writeOurHQLocation(rc, loc);
+            }
         }
-        for(MapLocation loc: ourIslandLocs){
-            writeIslandLocation(rc, loc);
+        catch(Exception e) {
+            //  Block of code to handle errors
+            System.out.println("Error reporting offline");
         }
-        for(MapLocation loc: enemyIslandLocs){
-            writeIslandLocation(rc, loc);
-        }
-        for(MapLocation loc: AdawellLocs){
-            writeWellLocation(rc, loc, ResourceType.ADAMANTIUM);
-        }
-        for(MapLocation loc: ManawellLocs){
-            writeWellLocation(rc, loc, ResourceType.MANA);
-        }
-        for(MapLocation loc: CurrentLocs){
-            writeData(rc, loc, 1);
-        }
-        for(MapLocation loc: CloudLocs){
-            writeData(rc, loc,2);
-        }
-//        System.out.println("Reached End!!");
     }
 
     static void recordingsystem(RobotController rc) throws GameActionException {
         try {
             boolean offline = rc.canWriteSharedArray(60, 1);
             if(offline == false) {
-                rc.setIndicatorString("Recording Offline");
                 record(rc);
             }
             else{
-                int radius = rc.getType().actionRadiusSquared;
-                if(hqLoc != null && rc.getLocation().distanceSquaredTo(hqLoc) <= radius){            if(rc.getLocation().isWithinDistanceSquared(hqLoc, radius)) {
-                    rc.setIndicatorString("Reporting offline");
-
-                    reportOffline(rc);
-//                    if(rc.getID()== 11608){
-//                        System.out.println("Reached End!!");
-//                    }
-//                    System.out.println("Reported Data End!!");
-                    islandAlert = false;
-                }
-
-                }
+                report(rc);
+                rc.setIndicatorString("Reporting");
             }
-
         }
         catch(Exception e1){
-                System.out.println("Error in recording system1");
-            }
-    }
-
-    static void report(RobotController rc) throws GameActionException {
-        WellInfo[] adawelllocs = rc.senseNearbyWells(ResourceType.ADAMANTIUM);
-        for(WellInfo loc:adawelllocs){
-            writeWellLocation(rc, loc.getMapLocation(), ResourceType.ADAMANTIUM); ;
-        }
-
-        WellInfo[]  manawelllocs = rc.senseNearbyWells(ResourceType.MANA);
-        for(WellInfo loc:manawelllocs){
-            writeWellLocation(rc, loc.getMapLocation(), ResourceType.MANA); ;
-        }
-
-        int[] islandlocs = rc.senseNearbyIslands();
-        for(int loc:islandlocs){
-            MapLocation[] locs = rc.senseNearbyIslandLocations(loc);
-            for(MapLocation loc2:locs){
-                writeIslandLocation(rc, loc2);
-            }
-
-        }
-        if(rc.getType() == RobotType.HEADQUARTERS){
-            writeOurHQLocation(rc, rc.getLocation());
-        }
-        RobotInfo[] robots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-        for(RobotInfo robot:robots){
-            if(robot.getType() == RobotType.HEADQUARTERS){
-                writeEnemyHQLocation(rc, robot.getLocation());
-            }
+            System.out.println("Error in recording system");
         }
     }
 
@@ -197,5 +192,30 @@ public class BotPrivateInfo {
                 System.out.println(island);
             }
         }
+    }
+
+    static void scanWells(RobotController rc) throws GameActionException {
+        WellInfo[] wells = rc.senseNearbyWells();
+        if(wells.length > 0) wellLoc = wells[0].getMapLocation();
+    }
+
+    static void scanIslands(RobotController rc) throws GameActionException {
+        int[] ids = rc.senseNearbyIslands();
+        for(int id : ids) {
+            if(rc.senseTeamOccupyingIsland(id) == Team.NEUTRAL) {
+                MapLocation[] locs = rc.senseNearbyIslandLocations(id);
+                if (locs.length > 0) {
+                    islandLoc = locs[0];
+                    break;
+                }
+            }
+        }
+    }
+
+
+    static int getTotalResources(RobotController rc) {
+        return rc.getResourceAmount(ResourceType.ADAMANTIUM)
+                + rc.getResourceAmount(ResourceType.MANA)
+                + rc.getResourceAmount(ResourceType.ELIXIR);
     }
 }

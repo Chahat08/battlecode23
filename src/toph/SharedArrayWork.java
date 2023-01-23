@@ -36,22 +36,16 @@ public class SharedArrayWork {
     static int MANA_WELL_LOCATIONS_LAST_INDEX = 30;
 
     // island locations
-    static int ISLAND_LOCATIONS_FIRST_INDEX = 32;
+    static int ISLAND_LOCATIONS_FIRST_INDEX = 31;
     static int ISLAND_LOCATIONS_LAST_INDEX = 40;
 
+    static int CURRENT_LOCATIONS_FIRST_INDEX = 40;
+    static int CURRENT_LOCATIONS_LAST_INDEX = 45;
+    static int CLOUD_LOCATIONS_FIRST_INDEX = 46;
+    static int CLOUD_LOCATIONS_LAST_INDEX = 50;
 
-    static int ENEMY_ISLAND_LOCATIONS_FIRST_INDEX = 41;
-    static int ENEMY_ISLAND_LOCATIONS_LAST_INDEX = 45;
-
-    static int NEUTRAL_ISLAND_LOCATIONS_FIRST_INDEX = 46;
-    static int NEUTRAL_ISLAND_LOCATIONS_LAST_INDEX = 50;
-
-    static int CURRENT_LOCATIONS_FIRST_INDEX = 51;
-    static int CURRENT_LOCATIONS_LAST_INDEX = 55;
-    static int CLOUD_LOCATIONS_FIRST_INDEX = 56;
-    static int CLOUD_LOCATIONS_LAST_INDEX = 60;
-
-
+    static int HQ_NEEDS_FIRST_INDEX = 51;
+    static int HQ_NEEDS_LAST_INDEX = 54;
     public static int locationToInt(RobotController rc, MapLocation m) {
         if (m == null) {
             return 0;
@@ -107,16 +101,17 @@ public class SharedArrayWork {
         return locations.toArray(new MapLocation[locations.size()]);
     }
 
-    public static void writeOurHQLocation(RobotController rc, MapLocation location) throws GameActionException{
-        if(!rc.canWriteSharedArray(OUR_HQ_LOCATIONS_FIRST_INDEX, 1)) return;
+    public static int writeOurHQLocation(RobotController rc, MapLocation location) throws GameActionException{
+        if(!rc.canWriteSharedArray(OUR_HQ_LOCATIONS_FIRST_INDEX, 1)) return -1;
         int val = locationToInt(rc, location);
         for(int i=OUR_HQ_LOCATIONS_FIRST_INDEX; i<=OUR_HQ_LOCATIONS_LAST_INDEX; ++i){
-            if(rc.readSharedArray(i) == val) return;
+            if(rc.readSharedArray(i) == val) return -1;
             if(rc.readSharedArray(i)==0) {
                 rc.writeSharedArray(i, val);
-                break;
+                return i;
             }
         }
+        return -1;
     }
 
     public static void writeEnemyHQLocation(RobotController rc, MapLocation location) throws GameActionException{

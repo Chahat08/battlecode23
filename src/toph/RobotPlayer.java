@@ -2,57 +2,39 @@ package toph;
 
 import battlecode.common.*;
 import toph.MapSymmetry.SymmetryType;
-import toph.SharedArray.SharedArrayAccess;
-import toph.SharedArray.SharedArrayAccessImpl;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 import static javax.swing.UIManager.put;
 import static toph.AmplifierStrategy.runAmplifier;
 import static toph.BotPrivateInfo.*;
 import static toph.CarrierStrategy.runCarrier;
+import static toph.Constants.*;
 import static toph.HeadquaterStrategy.runHeadquaters;
 import static toph.LauncherStrategy.runLauncher;
 import static toph.SharedArrayWork.*;
 
 public class RobotPlayer {
-    static int turnCount = 0; // num of turns robot has been alive for
-    static final Random rng = new Random(1012); // random number generator
-    static final Direction[] directions = {
-            Direction.NORTH,
-            Direction.NORTHEAST,
-            Direction.EAST,
-            Direction.SOUTHEAST,
-            Direction.SOUTH,
-            Direction.SOUTHWEST,
-            Direction.WEST,
-            Direction.NORTHWEST,
-    };
-
-    static final HashMap<Integer, SymmetryType> symmetries = new HashMap<Integer, SymmetryType>() {{
-        put(0, SymmetryType.ROTATIONAL);
-        put(1, SymmetryType.HORIZONTAL);
-        put(2, SymmetryType.VERTICAL);
-        //put(3, SymmetryType.ROTATIONAL);
-    }};
-
-    static final SharedArrayAccess sharedArray = new SharedArrayAccessImpl();
-    static boolean islandAlert = false;
-    static MapLocation hqLoc;
+    static int turnCount = 0;
     static boolean debugOn = false;
+
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
-//        System.out.println("TYPE: "+rc.getType()+", HEALTH: "+rc.getHealth());
-
+        System.out.println("TYPE: "+rc.getType()+", HEALTH: "+rc.getHealth());
         // game loop
         while(true){
+            // something to one move one is every robot has a home
+            // someone to go back to today!!
+            if(turnCount==0) {
+                scanHQ(rc);
+            }
             ++turnCount;
 
-
+            // record every thing that happens in this turn
             recordingsystem(rc);
+
+            // report to shared array if possible
             report(rc);
+
+            // HQ write a report if asked for
             if(debugOn == true ) writeReport(rc);
 
             try {
@@ -73,11 +55,12 @@ public class RobotPlayer {
             } catch(GameActionException e){
                 e.printStackTrace();
             } catch(Exception e) {
-
+                e.printStackTrace();
             } finally {
                 Clock.yield(); // make code wait until next turn, then cont
             }
         }
     }
+
 
 }

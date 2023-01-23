@@ -7,8 +7,7 @@ import java.util.HashMap;
 
 import static toph.LauncherStrategy.MAX_LAUNCHER_BOT_COUNT_PER_HQ;
 import static toph.MovementStrategy.moveRandom;
-import static toph.RobotPlayer.directions;
-import static toph.RobotPlayer.rng;
+import static toph.Constants.*;
 import static toph.RobotPlayer.turnCount;
 import static toph.LauncherStrategy.getBirthHQLocation;
 public class AmplifierStrategy {

@@ -2,8 +2,8 @@ package toph;
 
 import battlecode.common.*;
 
-
-import static toph.CarrierStrategy.scanHQ;
+import static toph.Constants.directions;
+import static toph.Constants.rng;
 import static toph.MovementStrategy.*;
 import static toph.RobotPlayer.*;
 import static toph.BotPrivateInfo.*;
@@ -26,17 +26,6 @@ public class LauncherStrategy {
     static boolean runback = false;
 
     static void runLauncher(RobotController rc) throws GameActionException {
-        if (rc.getID() % 10 == 1 && !islandAlert) {
-            scanHQ(rc);
-            rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
-            wallcollider(rc);
-            return;
-        }
-        if(islandAlert == true){
-            moveTowards(rc, hqLoc);
-            return;
-        }
-
         // let's have every 4th launcher we create remain near our hq for defense
         if(rc.getID()%DEFENSE_LAUNCHER_RATIO!=0) {
 
@@ -81,7 +70,6 @@ public class LauncherStrategy {
 
 
     static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
-        scanHQ(rc);
         // SET THE CURRENT TARGET LOCATION TO A PLAUSIBLE HQ LOCATION
 
         if (SharedArrayWork.readMapSymmetry(rc) == null) {
@@ -112,7 +100,6 @@ public class LauncherStrategy {
 
         currentTargetLocation = getBirthHQLocation(rc);
         mapHeight=rc.getMapHeight(); mapWidth=rc.getMapWidth();
-        scanHQ(rc);
         currentTargetLocation=rc.getLocation();
     }
 

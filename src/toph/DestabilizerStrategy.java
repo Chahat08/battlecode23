@@ -4,7 +4,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
-import static toph.RobotPlayer.directions;
+import static toph.Constants.*;
 
 public class DestabilizerStrategy {
 

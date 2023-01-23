@@ -8,14 +8,16 @@ import java.util.HashMap;
 import java.util.Map;
 import toph.SharedArray.SharedArrayAccess;
 import static common.utils.Utils.locationToInt;
+import static toph.Constants.*;
 import static toph.RobotPlayer.*;
+import static toph.SharedArrayWork.writeOurHQLocation;
 
 public class HeadquaterStrategy {
     static int iter = 0;
     // 3:1 launcher:carrier creation ratio in the beginning of the game
     static final int[] startingStrategy = {2,2, 1,3,1,3,1,3,1};
     static final int[] secondStrategy = {2,2, 1,1,3,1,1};
-
+    static int starveloc;
     static Direction dir;
     static MapLocation newLoc;
     static boolean buildRobots = true;
@@ -36,26 +38,21 @@ public class HeadquaterStrategy {
         if(turnCount==1) firstTurnCountRoutine(rc);
 
         // try to build an anchor every 50th turn?
-        if(turnCount%40==0 && turnCount > 100) buildAnchor(rc);
+        if(turnCount%100==0 && turnCount > 100) buildAnchor(rc);
 
         if(buildRobots) {
             // lets build multiple bots
             buildMultipleBots(rc);
         }
 
-
-
         // starvation strategy
+        starvestrat(rc);
         // check if resources are at a good level and do we need to stop feeding or what?
-
-        // communication strategy bus method
-        //Communication.tryWriteMessages(rc);
-
     }
 
     static void firstTurnCountRoutine(RobotController rc) throws GameActionException{
-
-
+        int i = writeOurHQLocation(rc, rc.getLocation());
+        starveloc = i + 50;
         // TODO: put all info in shared array
         SharedArrayWork.writeDefenseLauncherRadius(rc, INITIAL_DEFENSE_LAUNCHER_RADIUS, rc.getLocation());
 
@@ -109,8 +106,8 @@ public class HeadquaterStrategy {
                 if(currentLauncherSymmetry>symmetries.size()) currentLauncherSymmetry=1;
             }
         }
-
-        return (iter >= startingStrategy.length-1) ? 0 : iter + 1; // iter control
+        if (turnCount < 200) return  (iter >= startingStrategy.length-1) ? 0 : iter + 1;
+        else return (iter >= secondStrategy.length-1) ? 0 : iter + 1;
     }
 
     static int findbuildableloc(RobotController rc, RobotType r) throws GameActionException {
@@ -120,5 +117,17 @@ public class HeadquaterStrategy {
             if(rc.canBuildRobot(r, newLoc)) return i;
         }
         return -1;
+    }
+
+    static void starvestrat(RobotController rc) throws GameActionException {
+        if(rc.getResourceAmount(ResourceType.ADAMANTIUM) < 200 ) {
+            rc.writeSharedArray(starveloc, 1);
+        }
+        else if(rc.getResourceAmount(ResourceType.MANA) < 200 ) {
+            rc.writeSharedArray(starveloc, 2);
+        }
+        else if(rc.getResourceAmount(ResourceType.ADAMANTIUM) > 200 && rc.getResourceAmount(ResourceType.MANA) > 200) {
+            rc.writeSharedArray(starveloc, 0);
+        }
     }
 }

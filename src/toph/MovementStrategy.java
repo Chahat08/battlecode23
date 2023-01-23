@@ -4,9 +4,7 @@ import battlecode.common.*;
 
 import java.util.*;
 
-import static toph.BotPrivateInfo.wallColiderDir;
-import static toph.RobotPlayer.directions;
-import static toph.RobotPlayer.rng;
+import static toph.Constants.*;
 
 public class MovementStrategy {
     static MapLocation start;
