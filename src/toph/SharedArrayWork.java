@@ -85,7 +85,7 @@ public class SharedArrayWork {
         if(symmetryType== MapSymmetry.SymmetryType.ROTATIONAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 1);
         if(symmetryType==MapSymmetry.SymmetryType.HORIZONTAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 2);
         if(symmetryType==MapSymmetry.SymmetryType.VERTICAL) rc.writeSharedArray(MAP_SYMMETRY_INDEX, 3);
-        //System.out.println("SYMMETRY SET: "+readMapSymmetry(rc));
+        System.out.println("SYMMETRY SET: "+readMapSymmetry(rc));
 
     }
 

@@ -2,29 +2,27 @@ package toph;
 
 import battlecode.common.*;
 
-
-import java.util.HashMap;
-
-import static toph.LauncherStrategy.MAX_LAUNCHER_BOT_COUNT_PER_HQ;
-import static toph.MovementStrategy.moveRandom;
-import static toph.RobotPlayer.directions;
-import static toph.RobotPlayer.rng;
-import static toph.RobotPlayer.turnCount;
 import static toph.LauncherStrategy.getBirthHQLocation;
+import static toph.RobotPlayer.*;
 public class AmplifierStrategy {
     static boolean isAtTargetLocation = false;
     static MapLocation currentTargetLocation = null;
     static MapSymmetry.SymmetryType symmetryType = null;
     static boolean symmetrySet = false;
 
-    static int MAX_MOVES_PER_TURNCOUNT = 2;
+    static int MAX_MOVES_PER_TURNCOUNT = 5;
+
+    static RobotInfo[] enemyInfo;
+    static MapLocation[] ourHQLocs;
 
     static void runAmplifier(RobotController rc) throws GameActionException {
 
         if(turnCount==1) amplifierFirstTurnCountRoutine(rc);
         if(!isAtTargetLocation) moveToMyCurrentTargetLocation(rc);
+        //if(!symmetrySet) tryToSetSymmetry(rc);
         rc.setIndicatorString("target: "+currentTargetLocation);
     }
+
     static void amplifierFirstTurnCountRoutine(RobotController rc) throws GameActionException{
         symmetryType = SharedArrayWork.readMapSymmetry(rc);
         if(symmetryType==null){
@@ -33,10 +31,12 @@ public class AmplifierStrategy {
             currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), symmetryType);
         }
         else {
-            if(rng.nextBoolean())
-                currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), symmetryType);
-            else currentTargetLocation = getRandomLocationOnMap(rc);
             symmetrySet=true;
+            ourHQLocs = SharedArrayWork.readOurHQLocations(rc);
+            currentTargetLocation = getRandomLocationOnMap(rc);
+//            if(rng.nextBoolean())
+//                currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, getBirthHQLocation(rc), symmetryType);
+//            else currentTargetLocation = getRandomLocationOnMap(rc);
         }
 
 //        System.out.println("AMPLIFIER: "+currentTargetLocation);
@@ -49,9 +49,9 @@ public class AmplifierStrategy {
         int radius = rc.getType().actionRadiusSquared;
         Team opponent = rc.getTeam().opponent();
 
-        RobotInfo[] enemies = rc.senseNearbyRobots(radius, opponent);
-        if (enemies.length > 0) { // enemies found
-            for (RobotInfo enemy : enemies) {
+        enemyInfo = rc.senseNearbyRobots(radius, opponent);
+        if (enemyInfo.length > 0) { // enemies found
+            for (RobotInfo enemy : enemyInfo) {
                 RobotType type = enemy.getType();
                 if(type==RobotType.LAUNCHER||type==RobotType.DESTABILIZER)
                     return enemy.getLocation();
@@ -62,7 +62,7 @@ public class AmplifierStrategy {
     static void moveToMyCurrentTargetLocation(RobotController rc) throws GameActionException{
         Direction dir = rc.getLocation().directionTo(currentTargetLocation);
         // run from enemies!!
-        if(!symmetrySet) {
+        if(symmetrySet) {
             MapLocation enemyLoc = detectEnemies(rc);
             if(enemyLoc!=null) dir = rc.getLocation().directionTo(enemyLoc).opposite();
         }
@@ -79,18 +79,90 @@ public class AmplifierStrategy {
                     }
                 }
             }
+            if(!symmetrySet) tryToSetSymmetry(rc);
         }
-        if(rc.canSenseRobotAtLocation(currentTargetLocation)){
+
+    }
+
+    static void tryToSetSymmetry(RobotController rc) throws GameActionException {
+        if(symmetrySet) return;
+        // try to confirm via checking at current target location
+        if (rc.canSenseRobotAtLocation(currentTargetLocation)) {
             RobotInfo info = rc.senseRobotAtLocation(currentTargetLocation);
-            if(info.getType().equals(RobotType.HEADQUARTERS)) {
+            if (info.getType().equals(RobotType.HEADQUARTERS)) {
                 isAtTargetLocation = true;
-                if(!symmetrySet && SharedArrayWork.readMapSymmetry(rc)==null){
+                if (!symmetrySet && SharedArrayWork.readMapSymmetry(rc) == null) {
                     SharedArrayWork.writeMapSymmetry(rc, symmetryType);
-                    symmetrySet=true;
+                    symmetrySet = true;
+                }
+            }
+        } else {
+            for (RobotInfo bot : enemyInfo) {
+                if (bot.getType() == RobotType.HEADQUARTERS) {
+                    for (MapLocation ourHQ : ourHQLocs) {
+                        if (ourHQ.equals(MapSymmetry.getSymmetricalMapLocation(rc, bot.getLocation(), MapSymmetry.SymmetryType.ROTATIONAL))) {
+                            symmetryType = MapSymmetry.SymmetryType.ROTATIONAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        } else if (ourHQ.equals(MapSymmetry.getSymmetricalMapLocation(rc, bot.getLocation(), MapSymmetry.SymmetryType.HORIZONTAL))) {
+                            symmetryType = MapSymmetry.SymmetryType.HORIZONTAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        } else if (ourHQ.equals(MapSymmetry.getSymmetricalMapLocation(rc, bot.getLocation(), MapSymmetry.SymmetryType.VERTICAL))) {
+                            symmetryType = MapSymmetry.SymmetryType.VERTICAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }
+                    }
+                }
+            }
+        }
+        // if symmetry still not set, try to set via looking at other features
+        if(!symmetrySet){
+            WellInfo[] wellInfos = rc.senseNearbyWells();
+
+            MapLocation[] adaMapLocations = SharedArrayWork.readWellLocationsOfType(rc, ResourceType.ADAMANTIUM);
+            MapLocation[] manMapLocations = SharedArrayWork.readWellLocationsOfType(rc, ResourceType.MANA);
+
+            for(WellInfo wellInfo:wellInfos){
+                if(wellInfo.getResourceType().equals(ResourceType.ADAMANTIUM)){
+                    for(MapLocation mapLocation:adaMapLocations){
+                        if(mapLocation.equals(MapSymmetry.getSymmetricalMapLocation(rc, wellInfo.getMapLocation(), MapSymmetry.SymmetryType.ROTATIONAL))){
+                            symmetryType = MapSymmetry.SymmetryType.ROTATIONAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }else if(mapLocation.equals(MapSymmetry.getSymmetricalMapLocation(rc, wellInfo.getMapLocation(), MapSymmetry.SymmetryType.HORIZONTAL))){
+                            symmetryType = MapSymmetry.SymmetryType.HORIZONTAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }else if(mapLocation.equals(MapSymmetry.getSymmetricalMapLocation(rc, wellInfo.getMapLocation(), MapSymmetry.SymmetryType.VERTICAL))){
+                            symmetryType = MapSymmetry.SymmetryType.VERTICAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }
+                    }
+                }
+                else if(wellInfo.getResourceType().equals(ResourceType.MANA)){
+                    for(MapLocation mapLocation:manMapLocations){
+                        if(mapLocation.equals(MapSymmetry.getSymmetricalMapLocation(rc, wellInfo.getMapLocation(), MapSymmetry.SymmetryType.ROTATIONAL))){
+                            symmetryType = MapSymmetry.SymmetryType.ROTATIONAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }else if(mapLocation.equals(MapSymmetry.getSymmetricalMapLocation(rc, wellInfo.getMapLocation(), MapSymmetry.SymmetryType.HORIZONTAL))){
+                            symmetryType = MapSymmetry.SymmetryType.HORIZONTAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }else if(mapLocation.equals(MapSymmetry.getSymmetricalMapLocation(rc, wellInfo.getMapLocation(), MapSymmetry.SymmetryType.VERTICAL))){
+                            symmetryType = MapSymmetry.SymmetryType.VERTICAL;
+                            symmetrySet = true;
+                            SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+                        }
+                    }
                 }
             }
         }
 
+        if(symmetrySet) currentTargetLocation=getRandomLocationOnMap(rc);
     }
 
 }

@@ -2,19 +2,19 @@ package toph;
 
 import battlecode.common.*;
 
-
-import static toph.CarrierStrategy.scanHQ;
-import static toph.MovementStrategy.*;
+import static toph.BotPrivateInfo.wallColiderDir;
+import static toph.MovementStrategy.moveTowards;
+import static toph.MovementStrategy.wallcollider;
 import static toph.RobotPlayer.*;
-import static toph.BotPrivateInfo.*;
 
+// TODO: try to make launchers sit in clouds
 public class LauncherStrategy {
     static boolean hasFinalisedSymmetry = false;
 
     static final int DEFENSE_LAUNCHER_RATIO = 4;
     static final int MAX_LAUNCHER_BOT_COUNT_PER_HQ = 5;
-    static final int MAX_MOVES_PER_TURNCOUNT = 2;
-    static final int MAX_ATTACKS_PER_TURNCOUNT = 3;
+    static final int MAX_MOVES_PER_TURNCOUNT = 5;
+    static final int MAX_ATTACKS_PER_TURNCOUNT = 5;
 
     static MapLocation birthHQ=null;
 
@@ -27,7 +27,7 @@ public class LauncherStrategy {
 
     static void runLauncher(RobotController rc) throws GameActionException {
         if (rc.getID() % 10 == 1 && !islandAlert) {
-            scanHQ(rc);
+//            scanHQ(rc);
             rc.setIndicatorString(("WallColliderDir: " + wallColiderDir));
             wallcollider(rc);
             return;
@@ -51,7 +51,7 @@ public class LauncherStrategy {
             if (turnCount == 1) attackLaunchersFirstTurnCountRoutine(rc);
 
             // every third turncount, detect nearby things
-            if (turnCount % 3 == 0) detectNearbyThings(rc);
+            //if (turnCount % 3 == 0) detectNearbyThings(rc);
 
             if (!reachedEnemyHQ && turnCount % 2 == 1) { // MOVE every other turn
                 moveToCurrentTargetLocation(rc);
@@ -79,9 +79,8 @@ public class LauncherStrategy {
         }
     }
 
-
     static void attackLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
-        scanHQ(rc);
+//        scanHQ(rc);
         // SET THE CURRENT TARGET LOCATION TO A PLAUSIBLE HQ LOCATION
 
         if (SharedArrayWork.readMapSymmetry(rc) == null) {
@@ -110,10 +109,21 @@ public class LauncherStrategy {
 
     static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
 
-        currentTargetLocation = getBirthHQLocation(rc);
+        //currentTargetLocation = getBirthHQLocation(rc);
+        currentTargetLocation = pickNewTargetLocationNearHQ(rc);
         mapHeight=rc.getMapHeight(); mapWidth=rc.getMapWidth();
-        scanHQ(rc);
-        currentTargetLocation=rc.getLocation();
+//        scanHQ(rc);
+//        currentTargetLocation=rc.getLocation();
+    }
+    static MapLocation pickNewTargetLocationNearHQ(RobotController rc) throws GameActionException{
+        MapLocation loc = null, myloc = rc.getLocation();
+        int radius = SharedArrayWork.readDefenseLauncherRadius(rc, birthHQ);
+        do{
+            int addx = rng.nextInt(radius - (-radius) + 1) - radius;
+            int addy = rng.nextInt(radius - (-radius)+1) - radius;
+            loc = myloc.translate(addx, addy);
+        } while(loc.x<0||loc.y<0||loc.x>=mapWidth||loc.y>=mapHeight);
+        return loc;
     }
 
     static void moveToCurrentTargetLocation(RobotController rc) throws GameActionException{
@@ -151,6 +161,7 @@ public class LauncherStrategy {
         int radius = SharedArrayWork.readDefenseLauncherRadius(rc, currentTargetLocation);
         int x, y;
         do{
+
             int addX = rng.nextInt((radius - (-radius)) + 1) + (-radius);
             int addY = rng.nextInt((radius - (-radius)) + 1) + (-radius);
             x=currentTargetLocation.x+addX; y= currentTargetLocation.y+addY;
@@ -162,7 +173,7 @@ public class LauncherStrategy {
         int i=0;
         //while(i++<MAX_MOVES_PER_TURNCOUNT) {
             while (true) { // just finding a random direction to move in, wonder if iterating is better
-                Direction dir = rc.getLocation().directionTo(pickRandomNewLocationNearHQ(rc));
+                Direction dir = rc.getLocation().directionTo(currentTargetLocation.add(directions[rng.nextInt(directions.length)]));
                 if (rc.canMove(dir)) {
                     rc.move(dir);
                     break;
@@ -203,15 +214,15 @@ public class LauncherStrategy {
             symmetryType = symmetry;
             currentTargetLocation = MapSymmetry.getSymmetricalMapLocation(rc, birthHQ, symmetryType);
             hasFinalisedSymmetry=true;
-            return;
+            //return;
         }
-        if(rc.canSenseRobotAtLocation(currentTargetLocation)) {
-            RobotInfo bot = rc.senseRobotAtLocation(currentTargetLocation);
-            if (bot.getType() == RobotType.HEADQUARTERS) {
-                SharedArrayWork.writeMapSymmetry(rc, symmetryType);
-                hasFinalisedSymmetry = true;
-            }
-        }
+//        if(rc.canSenseRobotAtLocation(currentTargetLocation)) {
+//            RobotInfo bot = rc.senseRobotAtLocation(currentTargetLocation);
+//            if (bot.getType() == RobotType.HEADQUARTERS) {
+//                SharedArrayWork.writeMapSymmetry(rc, symmetryType);
+//                hasFinalisedSymmetry = true;
+//            }
+//        }
     }
 
     static void detectNearbyThings(RobotController rc) throws GameActionException {

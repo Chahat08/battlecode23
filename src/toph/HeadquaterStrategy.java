@@ -13,14 +13,26 @@ import static toph.RobotPlayer.*;
 public class HeadquaterStrategy {
     static int iter = 0;
     // 3:1 launcher:carrier creation ratio in the beginning of the game
-    static final int[] startingStrategy = {2,2, 1,3,1,3,1,3,1};
-    static final int[] secondStrategy = {2,2, 1,1,3,1,1};
+
+    static final Integer[] startingStrategy = {1,3};
+    static final Integer[] firstStrategy = {2,2, 1,1,3};
+    static final Integer[] secondStrategy = {2,2, 1,1};
+
+    static final Map<Integer, Integer[]> strategies = new HashMap<Integer, Integer[]>(){{
+        put(1, startingStrategy);
+        put(2, firstStrategy);
+        put(3, secondStrategy);
+    }};
+
+    static final int STARTING_STRATEGY_TURNCOUNTS=20;
+    static final int FIRST_STRATEGY_TURNCOUNTS=200;
+    //static final int SECOND_STRATEGY_TURNCOUNTS=20;
 
     static Direction dir;
     static MapLocation newLoc;
     static boolean buildRobots = true;
 
-    static Map<Integer, RobotType>  botTypes = new HashMap<Integer, RobotType>() {{
+    static final Map<Integer, RobotType>  botTypes = new HashMap<Integer, RobotType>() {{
         put(1, RobotType.LAUNCHER);
         put(2, RobotType.CARRIER);
         put(3, RobotType.AMPLIFIER);
@@ -86,19 +98,35 @@ public class HeadquaterStrategy {
     static void buildMultipleBots(RobotController rc) throws GameActionException{
         int i=0;
         while(i++<MAX_BOTS_TO_BUILD_IN_ONE_TURNCOUNT){
-            int createBot = 0;
-            if(turnCount<200) createBot = startingStrategy[iter]; // what to build
-            else createBot = secondStrategy[iter]; // what to build
+            int createBot = 0, strategyNumber = 0;
+
+            // pick a strategy, follow it
+            if(turnCount<=STARTING_STRATEGY_TURNCOUNTS){
+                createBot = startingStrategy[iter]; // what to build
+                strategyNumber=1; // pick a
+            }
+            else if(turnCount<=FIRST_STRATEGY_TURNCOUNTS){
+                if(turnCount==STARTING_STRATEGY_TURNCOUNTS+1) iter=0; //reset iter
+                createBot = firstStrategy[iter]; // what to build
+                strategyNumber=2;
+            }
+            else {
+                if(turnCount==FIRST_STRATEGY_TURNCOUNTS+1) iter=0; //reset iter
+                createBot = secondStrategy[iter]; // what to build
+                strategyNumber=3;
+            }
+
+
             int posloc = findbuildableloc(rc, botTypes.get(createBot)); // where to build
             // if possible build it else wait, posloc ensures it can be build n in that loc
-            if(rc.isActionReady() && posloc != -1) iter = buildbot(rc, iter, posloc, createBot);
+            if(rc.isActionReady() && posloc != -1) iter = buildbot(rc, iter, posloc, createBot, strategyNumber);
             else rc.setIndicatorString("WAITING");
 
 
         }
     }
 
-    static int buildbot(RobotController rc, int iter, int posloc, int createBot) throws GameActionException {
+    static int buildbot(RobotController rc, int iter, int posloc, int createBot, int strategyNumber) throws GameActionException {
         dir = directions[posloc]; // direction to build
         newLoc = rc.getLocation().add(dir); // location to build
         if(rc.canBuildRobot(botTypes.get(createBot), newLoc))
@@ -110,7 +138,7 @@ public class HeadquaterStrategy {
             }
         }
 
-        return (iter >= startingStrategy.length-1) ? 0 : iter + 1; // iter control
+        return (iter >= strategies.get(strategyNumber).length-1) ? 0 : iter + 1; // iter control
     }
 
     static int findbuildableloc(RobotController rc, RobotType r) throws GameActionException {

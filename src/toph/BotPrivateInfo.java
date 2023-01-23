@@ -40,7 +40,7 @@ public class BotPrivateInfo {
                     Team ourTeam = rc.getTeam();
                     Team enemyTeam = ourTeam.opponent();
                     if(!islandIdxs.contains(id)){
-                        System.out.println("Island Noticed: " + id + " " + locs[0]);
+//                        System.out.println("Island Noticed: " + id + " " + locs[0]);
 //                        if(rc.getID() == 11608){
 //                            System.out.println("Island Noticed: " + id + " " + locs[0]);
 //                        }
