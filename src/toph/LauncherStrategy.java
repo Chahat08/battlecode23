@@ -10,7 +10,7 @@ import static toph.Constants.directions;
 public class LauncherStrategy {
     static boolean hasFinalisedSymmetry = false;
 
-    static final int DEFENSE_LAUNCHER_RATIO = 4;
+    static final int DEFENSE_LAUNCHER_RATIO = 5;
     static final int MAX_LAUNCHER_BOT_COUNT_PER_HQ = 5;
     static final int MAX_MOVES_PER_TURNCOUNT = 5;
     static final int MAX_ATTACKS_PER_TURNCOUNT = 5;
@@ -65,7 +65,7 @@ public class LauncherStrategy {
             if(turnCount==1) defenseLaunchersFirstTurnCountRoutine(rc);
             attackEnemies(rc);
             attackHQSpottedEnemies(rc);
-            //moveRandomlyNearOurHQ(rc);
+            moveRandomlyNearOurHQ(rc);
             rc.setIndicatorString("DEFENSE LAUNCHER, target: "+currentTargetLocation);
             //System.out.println("def, "+turnCount+", "+currentTargetLocation);
         }
@@ -95,8 +95,8 @@ public class LauncherStrategy {
     }
 
     static void defenseLaunchersFirstTurnCountRoutine(RobotController rc) throws GameActionException{
-        //currentTargetLocation = getBirthHQLocation(rc);
-        //mapHeight=rc.getMapHeight(); mapWidth=rc.getMapWidth();
+        currentTargetLocation = getBirthHQLocation(rc);
+        mapHeight=rc.getMapHeight(); mapWidth=rc.getMapWidth();
         Direction dir = null;
         int j=0;
         while(j++<2) {
